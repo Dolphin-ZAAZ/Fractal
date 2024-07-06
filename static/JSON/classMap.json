@@ -1,0 +1,16 @@
+{
+    "css": "css",
+    "html": "htmlmixed",
+    "javascript": "javascript",
+    "lua": "lua",
+    "markdown": "markdown",
+    "php": "php",
+    "powershell": "powershell",
+    "python": "python",
+    "shell": "shell",
+    "sql": "sql",
+    "vb": "vb",
+    "vbscript": "vbscript",
+    "xml": "xml",
+    "yaml": "yaml"
+}

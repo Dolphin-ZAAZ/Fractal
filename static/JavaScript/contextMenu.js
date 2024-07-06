@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let mouseX = 0, mouseY = 0;
+    
     const menuItems = [
-        { text: 'Option 1', action: () => alert('Option 1 clicked') },
-        { text: 'Option 2', action: () => alert('Option 2 clicked') },
-        { text: 'Option 3', action: () => alert('Option 3 clicked') }
+        { text: 'Add Text Box', action: (x,y) => new Widget(x,y) },
+        { text: 'Add Code Box', action: (x,y) => new CodeWidget(x,y) },
+        { text: 'Clear Canvas', action: () => clearCanvas() }
     ];
 
     function createContextMenu(items) {
@@ -15,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const menuItem = document.createElement('li');
             menuItem.className = 'context-menu-item';
             menuItem.textContent = item.text;
-            menuItem.addEventListener('click', item.action);
+            menuItem.addEventListener('click', () => item.action(mouseX, mouseY));
             menuList.appendChild(menuItem);
         });
 
@@ -24,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showContextMenu(event) {
         event.preventDefault();
+
+        mouseX = event.pageX; // Capture mouse position
+        mouseY = event.pageY;
 
         const contextMenu = createContextMenu(menuItems);
         contextMenu.style.left = `${event.pageX}px`;
