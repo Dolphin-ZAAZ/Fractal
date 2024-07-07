@@ -49,7 +49,7 @@ body {
 }
 
 #canvas {
-    width: 2000px;
-    height: 2000px;
+    width: 20000px;
+    height: 20000px;
     position: absolute;
 }
