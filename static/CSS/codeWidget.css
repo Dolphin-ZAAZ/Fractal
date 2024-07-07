@@ -26,3 +26,30 @@
     width: 100%;
     height: 100%;
 }
+
+.save-button {
+    background-color: #1e88e5;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.file-name-input {
+    padding: 5px;
+    background-color: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin: 10px;
+}
+
+.language-selector {
+    padding: 5px;
+    background-color: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin: 10px;
+}

@@ -20,8 +20,8 @@
     grid-template-columns: repeat(auto-fit, minmax(20px, 1fr)); /* Adjust '100px' to your minimum child width */
     grid-template-rows: auto; /* Adjust based on content */
     padding: 5px;
-    background-color: #f8f8f8;
-    border: 1px solid #e0e0e0;
+    background-color: #7e7e7e;
+    border: 1px solid #535353;
     z-index: 100;
     overflow: hidden; /* Ensures content does not overflow the container */
     overflow-y: auto; /* Enables vertical scrolling */

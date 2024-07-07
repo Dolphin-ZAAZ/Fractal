@@ -43,7 +43,6 @@ body {
     overflow: hidden;
     position: relative;
     background-color: var(--canvas-background-color);
-    border-radius: 12px;
     box-shadow: 0 4px 8px var(--widget-hover-shadow);
     cursor: grab;
 }
