@@ -62,11 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
 function clearCanvas() {
     storedWidgets = [];
     storedStates = [];
     // Optionally, you might wants to also clear the canvas or reset the state
     canvas.innerHTML = ''; // Clear the canvas content if needed
+    canvas.style.cssText = ''; // Reset the canvas style if needed
     localStorage.clear();
 }
