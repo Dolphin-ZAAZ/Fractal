@@ -1,8 +1,7 @@
 class CodeWidget extends BaseWidget {
     // Add widget functionality
     constructor(x, y, widgetType, width, height, content, isNew = true) {
-        content = '';
-        super(x, y, widgetType, width, height, content, isNew);
+        super(x, y, widgetType, width, height, '', isNew);
 
         this.padding = 80;
 
@@ -34,7 +33,6 @@ class CodeWidget extends BaseWidget {
         // Initialize CodeMirror
         this.editor = CodeMirror.fromTextArea(this.widgetCodeBlock, {
             lineNumbers: true,
-            scale: '1 !important',
             mode: "python",
             theme: "dracula",
             className: 'widget-code-block'
@@ -44,12 +42,22 @@ class CodeWidget extends BaseWidget {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
             this.updateWidgetState();
         });
-    
+        this.editor.setOption("value", content);
         languageSelector.addEventListener('change', () => {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
+            this.updateWidgetState();
         });
 
         this.MakeEditorResizable(this.editor, this.padding, this.widgetContainer);
+        document.getElementById('canvas-container').addEventListener('wheel', (e) => {
+            e.preventDefault();
+            this.updateEditorSize(this.widgetContainer, this.editor);
+        });
+    }
+
+    updateWidgetState() {
+        super.updateWidgetState();
+        this.widgetState.content = this.editor.getValue();
     }
 
     createCodeBlock() {

@@ -1,15 +1,28 @@
+
+let scaleRatio = 1;
 class BaseWidget {
     constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, content = '', isNew = true) {
+        this.canvas = document.getElementById('canvas');
+        const rect = this.canvas.getBoundingClientRect();
+
+        // Calculate the relative position of the mouse within the canvas
+        const relativeX = x - rect.left;
+        const relativeY = y - rect.top;
         this.widgetState = {
             x: x,
             y: y,
             widgetType: widgetType,
             width: width,
             height: height,
+            padding: 80,
             content: content
         };
         this.canvas = document.getElementById('canvas');
-        this.widgetContainer = this.createWidgetContainer(x, y, width, height);
+        if (isNew) {
+            this.widgetContainer = this.createWidgetContainer(relativeX, relativeY, width, height);
+        } else {
+            this.widgetContainer = this.createWidgetContainer(x, y, width, height);
+        }
         this.widgetContents = this.createWidgetContents(content);
         this.resizeHandle = this.createResizeHandle();
         this.dragHandle = this.createDragHandle();
@@ -94,8 +107,12 @@ class BaseWidget {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
             if (document.body.contains(this.widgetContainer)) {
-                const index = storedWidgets.indexOf(this.widgetState);
-                storedWidgets.splice(index, 1);
+                for (let i = 0; i < storedWidgets.length; i++) {
+                    if (storedWidgets[i] === this) {
+                        storedWidgets.splice(i, 1);
+                        storedStates.splice(i, 1);
+                    }
+                }
                 this.widgetContainer.remove();
             }
         });
@@ -109,8 +126,8 @@ class BaseWidget {
             const startTop = parseInt(this.widgetContainer.style.top, 10);
 
             const onMouseMove = (e) => {
-                const dx = (e.clientX - startX) / scale;
-                const dy = (e.clientY - startY) / scale;
+                const dx = (e.clientX - startX) / scaleRatio;
+                const dy = (e.clientY - startY) / scaleRatio;
                 this.widgetContainer.style.left = `${startLeft + dx}px`;
                 this.widgetContainer.style.top = `${startTop + dy}px`;
                 this.widgetState.x = parseInt(this.widgetContainer.style.left, 10);
@@ -138,8 +155,8 @@ class BaseWidget {
             const padding = 80;
 
             const onMouseMove = (e) => {
-                const dx = (e.clientX - startX) / scale;
-                const dy = (e.clientY - startY) / scale;
+                const dx = (e.clientX - startX) / scaleRatio;
+                const dy = (e.clientY - startY) / scaleRatio;
                 this.widgetContainer.style.width = `${startWidth + dx}px`;
                 this.widgetContainer.style.height = `${startHeight + dy}px`;
                 this.resizeContents(padding, this.widgetContainer);
@@ -176,5 +193,25 @@ class BaseWidget {
         this.widgetState.width = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
         this.widgetState.height = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
         this.widgetState.content = this.widgetContents.innerHTML;
+    }
+
+    updateScale(newScale, mouseX, mouseY, zoomRatio) {
+        const rect = canvas.getBoundingClientRect();
+        const canvasX = this.widgetContainer.getBoundingClientRect().left - rect.left;
+        const canvasY = this.widgetContainer.getBoundingClientRect().top - rect.top;
+
+        const newLeft = canvasX * zoomRatio + (1 - zoomRatio) * mouseX;
+        const newTop = canvasY * zoomRatio + (1 - zoomRatio) * mouseY;
+
+        const newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
+        const newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
+
+        this.widgetContainer.style.left = `${newLeft}px`;
+        this.widgetContainer.style.top = `${newTop}px`;
+        this.widgetContainer.style.width = `${newWidth}px`;
+        this.widgetContainer.style.height = `${newHeight}px`;
+
+        this.resizeContents(80);
+        this.updateWidgetState();
     }
 }

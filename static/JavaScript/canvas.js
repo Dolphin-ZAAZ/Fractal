@@ -7,11 +7,15 @@ let scale = 1;
 
 // Pan functionality
 canvasContainer.addEventListener('mousedown', (e) => {
-    if (e.target.className === 'widget-text' || e.target.className === 'resize-handle' || e.target.className === 'drag-handle' || e.target.className === 'text-widget' || e.target.className === 'delete-button') {
-        return; // Exit the function if the text box is the target
+    if (e.target.className === 'widget-container' || e.target.className === 'resize-handle' || e.target.className === 'drag-handle' || e.target.className === 'options-container' || e.target.className === 'delete-button' || e.target.className === 'widget-contents') {
+        if (e.altKey == false) {
+            return; // Exit the function if the text box is the target
+        }
     }
     if (isClickInsideElementWithClass(e, 'CodeMirror')) {
-        return; // Exit the function if the CodeMirror editor is the target
+        if (e.altKey == false) {
+            return; // Exit the function if the CodeMirror editor is the target
+        }
     }
 
     if (e.button === 0) { // Left-click
@@ -36,13 +40,18 @@ canvasContainer.addEventListener('mouseup', () => {
     canvas.style.pointerEvents = 'auto'; // Re-enable pointer events on children
 });
 
-// Add zoom functionality
-canvasContainer.addEventListener('wheel', (e) => {
+let initialMouseX = null;
+let initialMouseY = null;
+let initialRect = null;
+
+document.getElementById('canvas-container').addEventListener('wheel', (e) => {
     e.preventDefault();
-    
-    const canvasRect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - canvasRect.left;
-    const mouseY = e.clientY - canvasRect.top;
+
+    if (initialMouseX === null && initialMouseY === null) {
+        initialRect = canvas.getBoundingClientRect();
+        initialMouseX = e.clientX - initialRect.left;
+        initialMouseY = e.clientY - initialRect.top;
+    }
 
     const zoomFactor = 0.03;
     let newScale = scale + (e.deltaY > 0 ? -zoomFactor : zoomFactor);
@@ -50,16 +59,29 @@ canvasContainer.addEventListener('wheel', (e) => {
 
     const zoomRatio = newScale / scale;
 
-    // Calculate the new position to keep the zoom centered on the mouse
-    const offsetX = mouseX - mouseX * zoomRatio;
-    const offsetY = mouseY - mouseY * zoomRatio;
+    // Adjust the canvas dimensions
+    const newWidth = initialRect.width * zoomRatio;
+    const newHeight = initialRect.height * zoomRatio;
 
-    canvas.style.transformOrigin = '0 0'; // Set transform origin to top-left corner
-    canvas.style.transform = `scale(${newScale})`;
+    // Calculate the new position to keep the zoom centered on the initial mouse position
+    const offsetX = initialMouseX * (1 - zoomRatio);
+    const offsetY = initialMouseY * (1 - zoomRatio);
 
-    // Adjust the canvas position to zoom towards the mouse
+    canvas.style.width = `${newWidth}px`;
+    canvas.style.height = `${newHeight}px`;
     canvas.style.left = `${canvas.offsetLeft + offsetX}px`;
     canvas.style.top = `${canvas.offsetTop + offsetY}px`;
 
     scale = newScale;
+    updateAllWidgetsScale(newScale, initialMouseX, initialMouseY, zoomRatio);
+
+    // Reset initial mouse positions after zooming
+    initialMouseX = null;
+    initialMouseY = null;
 });
+// Update the scale for all widgets
+function updateAllWidgetsScale(newScale, mouseX, mouseY, zoomRatio) {
+    storedWidgets.forEach(widget => {
+        widget.updateScale(newScale, mouseX, mouseY, zoomRatio);
+    });
+}
