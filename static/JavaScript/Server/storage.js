@@ -1,62 +1,72 @@
+let storedWidgets = [];
+let storedStates = [];
+let widgetTypes = {};
 
-// Persistent storage implementation
-window.addEventListener('load', () => {
-    // Load the canvas content from local storage
-    canvas.innerHTML = localStorage.getItem('canvasContent') || canvas.innerHTML;
+document.addEventListener('DOMContentLoaded', () => {
+    widgetTypes = {
+        'BaseWidget': BaseWidget,
+        'CodeWidget': CodeWidget
+    };
+
+    // Persistent storage implementation
+    window.addEventListener('load', () => {
+        // Load the canvas style from local storage
+        loadCanvas(getCanvasStyle, getWidgets);
+    });
+
+    window.addEventListener('beforeunload', () => {   
+        // Save the canvas style to local storage
+        saveCanvas(setCanvasStyle, setWidgets);
+    });
+
+    function getCanvasStyle() {
+        const canvasStyle = localStorage.getItem('canvasStyle');
+        if (canvasStyle) {
+            canvas.style.cssText = canvasStyle;
+        }
+    }
+
+    function setCanvasStyle() {
+        localStorage.setItem('canvasStyle', canvas.style.cssText);
+    }
+
+    function getWidgets() {
+        const widgets = localStorage.getItem('widgets');
+        if (widgets) {
+            storedStates = JSON.parse(widgets);
+            storedStates.forEach(widget => {
+                const newWidget = new widgetTypes[widget.widgetType](widget.x, widget.y, widget.widgetType, widget.width, widget.height, widget.content, false);
+                storedWidgets.push(newWidget);
+            });
+        }
+    }
+
+    function setWidgets() {
+        for (let i = 0; i < storedWidgets.length; i++) {
+            storedStates[i] = storedWidgets[i].widgetState;
+        }
+        localStorage.setItem('widgets', JSON.stringify(storedStates));
+    }
+    function saveCanvas(setCanvasStyle, setWidgets) {
+        setCanvasStyle();
+        setWidgets();
+        storedWidgets = [];
+        storedStates = [];
+    }
     
-    // Load the canvas style from local storage
-    const styleString = localStorage.getItem('canvasStyle');
-    if (styleString) {
-        const styleProperties = styleString.split(';').filter(Boolean);
-        for (const property of styleProperties) {
-            const [key, value] = property.split(':').map((s) => s.trim());
-            canvas.style[key] = value;
-        }
-    }
-
-    // Load the children styles from local storage
-    const childrenStyles = localStorage.getItem('childrenStyles');
-    if (childrenStyles) {
-        const children = childrenStyles.split('|').filter(Boolean);
-        for (let i = 0; i < canvas.children.length; i++) {
-            const child = canvas.children[i];
-            const childStyleString = children[i];
-            const styleProperties = childStyleString.split(';').filter(Boolean);
-            for (const property of styleProperties) {
-                const [key, value] = property.split(':').map((s) => s.trim());
-                child.style[key] = value;
-            }
-        }
-    }
-});
-
-window.addEventListener('beforeunload', () => {
-    // Save the canvas content to local
-    localStorage.setItem('canvasContent', canvas.innerHTML);
-    
-    // Save the canvas style to local storage
-    let styleString = "";
-    for (const property of Object.keys(canvas.style)) {
-        if (canvas.style[property]) {
-            styleString += `${property}: ${canvas.style[property]}; `;
-        }
-    }
-    localStorage.setItem('canvasStyle', styleString);
-
-    let childrenStyles = '';
-    for (const child of canvas.children) {
-        let childStyleString = '';
-        for (const property of Object.keys(child.style)) {
-            if (child.style[property]) {
-                childStyleString += `${property}: ${child.style[property]}; `;
-            }
-        }
-        childrenStyles += childStyleString + '|';
+    function loadCanvas(getCanvasStyle, getWidgets) {
+        storedWidgets = [];
+        storedStates = [];
+        getCanvasStyle();
+        getWidgets();
     }
 });
 
 function clearCanvas() {
-    localStorage.clear();
+    storedWidgets = [];
+    storedStates = [];
     // Optionally, you might wants to also clear the canvas or reset the state
     canvas.innerHTML = ''; // Clear the canvas content if needed
+    canvas.style.cssText = ''; // Reset the canvas style if needed
+    localStorage.clear();
 }
