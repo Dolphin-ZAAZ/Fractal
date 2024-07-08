@@ -17,6 +17,11 @@ canvasContainer.addEventListener('mousedown', (e) => {
             return; // Exit the function if the CodeMirror editor is the target
         }
     }
+    if (isClickInsideElementWithClass(e, 'widget-container')) {
+        if (e.altKey == false) {
+            return; // Exit the function if the chat message box is the target
+        }
+    }
 
     if (e.button === 0) { // Left-click
         isPanning = true;
@@ -45,6 +50,11 @@ let initialMouseY = null;
 let initialRect = null;
 
 document.getElementById('canvas-container').addEventListener('wheel', (e) => {
+    if (isClickInsideElementWithClass(e, 'widget-container')) {
+        if (e.altKey == false) {
+            return; // Exit the function if the CodeMirror editor is the target
+        }
+    }
     e.preventDefault();
 
     if (initialMouseX === null && initialMouseY === null) {

@@ -1,7 +1,7 @@
 
 let scaleRatio = 1;
 class BaseWidget {
-    constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, content = '', isNew = true) {
+    constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, content = '', isNew = true, id = 0) {
         this.canvas = document.getElementById('canvas');
         const rect = this.canvas.getBoundingClientRect();
 
@@ -9,6 +9,7 @@ class BaseWidget {
         const relativeX = x - rect.left;
         const relativeY = y - rect.top;
         this.widgetState = {
+            id: id,
             x: x,
             y: y,
             widgetType: widgetType,
@@ -37,6 +38,7 @@ class BaseWidget {
             storedWidgets.push(this);
             storedStates.push(this.widgetState);
         }
+        this.updateWidgetState();
     }
 
     createWidgetContainer(x, y, width, height) {

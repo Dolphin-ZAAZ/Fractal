@@ -1,9 +1,13 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import os
 import json
 import utility_functions as uf
+import inferrence_functions as infunc
+import save_state as ss
 
 app = Flask(__name__)
+
+model = infunc.main_model
 
 @app.route('/')
 def index():
@@ -41,6 +45,58 @@ def class_map():
     with open(json_path) as json_file:
         data = json.load(json_file)
     return jsonify(data)
+
+@app.route('/data/prism-map')
+def prism_map():
+    json_path = os.path.join(app.static_folder, 'JSON', 'prismMap.json')
+    with open(json_path) as json_file:
+        data = json.load(json_file)
+    return jsonify(data)
+
+@app.route('/chat/get-response', methods=['POST'])
+def get_response():
+    data = request.json
+    user_input = data['user_input']
+    chat_widget_id = data['chat_widget_id']
+    response = process_input(user_input, chat_widget_id)
+    return jsonify(response=response)
+
+@app.route('/get-history', methods=['POST'])
+def get_history():
+    user_messages, ai_responses = ss.get_memory_history()
+    return jsonify(user_messages=user_messages, ai_responses=ai_responses)
+
+local_storage_data = {}
+
+@app.route('/data/set-local-storage', methods=['POST'])
+def save_local_storage():
+    global local_storage_data
+    local_storage_data = json.loads(request.data) # Get the data sent from the client
+    ss.set_local_storage(local_storage_data)  # Save the data to the local storage file
+    return '', 204
+
+@app.route('/data/get-local-storage', methods=['GET'])
+def load_local_storage():
+    global local_storage_data
+    local_storage_data = ss.get_local_storage()  # Load the local storage data from the file
+    return jsonify(local_storage_data)  # Send the saved local storage data to the client
+
+
+def process_input(message, chat_widget_id):
+    global start_logging
+    messages = ss.get_past_messages(5, chat_widget_id)
+    print(messages)
+    preprompt = ""
+    formatted_response = infunc.get_full_ai_response(messages, message, model, preprompt)
+    web_response = formatted_response.replace("AI: ", "").replace("\n", "zxz")
+    delayed_actions(message, formatted_response, chat_widget_id)
+    return web_response
+
+def delayed_actions(message, formatted_response, chat_widget_id):
+    global start_logging
+    ss.add_to_memory(message, formatted_response.replace("AI: ", ""), chat_widget_id)
+    start_logging = False
+    print("Delayed actions completed.")
 
 if __name__ == '__main__':
     app.run(port=8001, debug=True)

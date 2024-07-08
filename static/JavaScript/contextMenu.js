@@ -2,13 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let mouseX = 0, mouseY = 0;
     
     const menuItems = [
+        { text: 'Add Chat Box', action: (x,y) => addWidget(x,y, 'ChatWidget')},
         { text: 'Add Text Box', action: (x,y) => addWidget(x,y, 'BaseWidget') },
         { text: 'Add Code Box', action: (x,y) => addWidget(x,y, 'CodeWidget') },
         { text: 'Clear Canvas', action: () => clearCanvas() }
     ];
 
     function addWidget(x, y, widgetType) {
-        const widget = new widgetTypes[widgetType](x, y, widgetType, 300, 200, "", true);
+        const widget = new widgetTypes[widgetType](x, y, widgetType, 400, 300, "", true, actionLog.length);
+        actionLog.push({ action: 'add', widget: widget.widgetState });
     }
 
     function createContextMenu(items) {
