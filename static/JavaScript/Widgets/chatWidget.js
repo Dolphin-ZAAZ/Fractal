@@ -1,7 +1,7 @@
 let isRequestInProgress = false;
 class ChatWidget extends BaseWidget {
-    constructor(x, y, widgetType, width, height, content, isNew = true, id = 0) {
-        super(x, y, widgetType, width, height, content, isNew, id);
+    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0) {
+        super(x, y, widgetType='ChatWidget', width, height, padding, content, isNew, id);
         if (!this.widgetContents.querySelector('.chat-container')) {
             this.chatContainer = document.createElement('div');
         }

@@ -1,36 +1,28 @@
 class CodeWidget extends BaseWidget {
     // Add widget functionality
-    constructor(x, y, widgetType, width, height, content, isNew = true, id = 0) {
-        super(x, y, widgetType, width, height, '', isNew, id);
-
-        this.padding = 80;
+    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0) {
+        super(x, y, widgetType='CodeWidget', width, height, padding, '', isNew, id);
 
         // File name input
-        const fileNameInput = document.createElement('input');
-        fileNameInput.className = 'file-name-input';
-        fileNameInput.placeholder = 'File Name';
+        const fileNameInput = this.createFileNameInput();
 
         // Language selector
-        const languageSelector = document.createElement('select');
-        languageSelector.className = 'language-selector';
-        languageSelector.innerHTML = languageOptions;
-        languageSelector.value = languageMap[defaultLanguage];
+        const languageSelector = this.createLanguageSelector();
     
         // CodeMirror textarea  
         this.widgetCodeBlock = this.createCodeBlock();
     
         // Save button
-        const saveButton = document.createElement('button');
-        saveButton.className = 'save-button';
-        saveButton.textContent = 'Save';
+        const saveButton = this.createSaveButton();
     
-        this.optionsContainer.appendChild(fileNameInput);
-        this.optionsContainer.appendChild(languageSelector);
-        this.optionsContainer.appendChild(saveButton);
-
-        this.widgetContents.appendChild(this.widgetCodeBlock);
-
+        this.addOptionsToContainer(fileNameInput, languageSelector, saveButton);
+        
         // Initialize CodeMirror
+        this.initializeCodeMirror(languageSelector, content);
+    }
+
+    initializeCodeMirror(languageSelector, content) {
+        this.widgetContents.appendChild(this.widgetCodeBlock);
         this.editor = CodeMirror.fromTextArea(this.widgetCodeBlock, {
             lineNumbers: true,
             mode: "python",
@@ -48,16 +40,45 @@ class CodeWidget extends BaseWidget {
             this.updateWidgetState();
         });
 
-        this.MakeEditorResizable(this.editor, this.padding, this.widgetContainer);
+        this.MakeEditorResizable(this.editor, this.widgetState.padding, this.widgetContainer);
         document.getElementById('canvas-container').addEventListener('wheel', (e) => {
-            e.preventDefault();
-            this.updateEditorSize(this.widgetContainer, this.editor);
+            this.updateEditorSize(this.widgetContents, this.editor);
         });
+    }
+
+    addOptionsToContainer(fileNameInput, languageSelector, saveButton) {
+        this.optionsContainer.appendChild(fileNameInput);
+        this.optionsContainer.appendChild(languageSelector);
+        this.optionsContainer.appendChild(saveButton);
+    }
+
+    createSaveButton() {
+        const saveButton = document.createElement('button');
+        saveButton.className = 'save-button';
+        saveButton.textContent = 'Save';
+        return saveButton;
+    }
+
+    createFileNameInput() {
+        const fileNameInput = document.createElement('input');
+        fileNameInput.className = 'file-name-input';
+        fileNameInput.placeholder = 'File Name';
+        return fileNameInput;
+    }
+
+    createLanguageSelector() {
+        const languageSelector = document.createElement('select');
+        languageSelector.className = 'language-selector';
+        languageSelector.innerHTML = languageOptions;
+        languageSelector.value = languageMap[defaultLanguage];
+        return languageSelector;
     }
 
     updateWidgetState() {
         super.updateWidgetState();
-        this.widgetState.content = this.editor.getValue();
+        if (this.editor) {
+            this.widgetState.content = this.editor.getValue();
+        }
     }
 
     createCodeBlock() {
@@ -87,8 +108,6 @@ class CodeWidget extends BaseWidget {
     // Function to update the CodeMirror editor size
     updateEditorSize(container, editor) {
         // Calculate the size of the editor excluding padding and drag handle height
-        const padding = 60; // top (10) + bottom (10) padding
-        const dragHandleHeight = 20;
         const width = parseInt(document.defaultView.getComputedStyle(container).width, 10);
         const height = parseInt(document.defaultView.getComputedStyle(container).height, 10);
         editor.setSize(width, height);

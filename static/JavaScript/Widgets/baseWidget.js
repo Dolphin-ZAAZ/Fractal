@@ -1,7 +1,6 @@
-
 let scaleRatio = 1;
 class BaseWidget {
-    constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, content = '', isNew = true, id = 0) {
+    constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, padding = 80, content = '', isNew = true, id = 0, isMinimized = false) {
         this.canvas = document.getElementById('canvas');
         const rect = this.canvas.getBoundingClientRect();
 
@@ -15,8 +14,9 @@ class BaseWidget {
             widgetType: widgetType,
             width: width,
             height: height,
-            padding: 80,
-            content: content
+            padding: padding,
+            content: content,
+            isMinimized: isMinimized
         };
         this.canvas = document.getElementById('canvas');
         if (isNew) {
@@ -36,7 +36,7 @@ class BaseWidget {
         
         if (isNew) {
             storedWidgets.push(this);
-            storedStates.push(this.widgetState);
+            storedWidgetStates.push(this.widgetState);
         }
         this.updateWidgetState();
     }
@@ -146,17 +146,13 @@ class BaseWidget {
             const startY = e.clientY;
             const startWidth = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
             const startHeight = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
-            const padding = 80;
 
             const onMouseMove = (e) => {
                 const dx = (e.clientX - startX) / scaleRatio;
                 const dy = (e.clientY - startY) / scaleRatio;
-                this.widgetContainer.style.width = `${startWidth + dx}px`;
-                this.widgetContainer.style.height = `${startHeight + dy}px`;
-                this.resizeContents(padding, this.widgetContainer);
-                this.widgetState.width = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
-                this.widgetState.height = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
+                this.resizeWidget(startWidth, dx, startHeight, dy);
                 this.updateWidgetState();
+                this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
             };
 
             document.addEventListener('mousemove', onMouseMove);
@@ -165,6 +161,35 @@ class BaseWidget {
                 document.removeEventListener('mousemove', onMouseMove);
             }, { once: true });
         });
+    }
+
+    resizeWidget(startWidth, dx, startHeight, dy) {
+        this.widgetContainer.style.width = `${startWidth + dx}px`;
+        this.widgetContainer.style.height = `${startHeight + dy}px`;
+        this.resizeContents(this.widgetState.padding, this.widgetContainer);
+        this.widgetState.width = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
+        this.widgetState.height = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
+    }
+
+    updateIconifyStatus(height, width) {
+        console.log(height, width);
+        const blockSize = 50;
+        let minSize = widgetTypes[this.widgetState.widgetType].minSize;
+        if (height < minSize || width < minSize) {
+            this.widgetContents.classList.add('hidden');
+            this.optionsContainer.classList.add('hidden');
+            this.resizeWidget(width, 0, height, 0);
+            this.widgetState.isMinimized = true;
+        }
+        if (this.widgetState.isMinimized && height >= minSize && width >= minSize) {
+            this.widgetContents.classList.remove('hidden');
+            this.optionsContainer.classList.remove('hidden');
+            this.resizeWidget(minSize + 20, 0, minSize + 20, 0);
+            this.widgetState.isMinimized = false;
+        }
+        if (height <= blockSize || width <= blockSize) {
+            this.resizeWidget(blockSize, 0, blockSize, 0);
+        }
     }
 
     resizeContents(padding, container = this.widgetContainer) {
@@ -178,7 +203,7 @@ class BaseWidget {
         this.makeDeletable();
         this.makeDraggable();
         this.makeResizable();
-        this.resizeContents(80);
+        this.resizeContents(this.widgetState.padding, this.widgetContainer);
     }
 
     updateWidgetState() {
@@ -205,7 +230,7 @@ class BaseWidget {
         this.widgetContainer.style.width = `${newWidth}px`;
         this.widgetContainer.style.height = `${newHeight}px`;
 
-        this.resizeContents(80);
+        this.resizeContents(this.widgetState.padding);
         this.updateWidgetState();
     }
 }

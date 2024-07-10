@@ -91,8 +91,8 @@ def delete_memory():
 
 def process_input(message, chat_widget_id):
     global start_logging
+    start_logging = True
     messages = ss.get_past_messages(5, chat_widget_id)
-    print(messages)
     preprompt = ""
     formatted_response = infunc.get_full_ai_response(messages, message, model, preprompt)
     web_response = formatted_response.replace("AI: ", "").replace("\n", "zxz")
@@ -103,7 +103,6 @@ def delayed_actions(message, formatted_response, chat_widget_id):
     global start_logging
     ss.add_to_memory(message, formatted_response.replace("AI: ", ""), chat_widget_id)
     start_logging = False
-    print("Delayed actions completed.")
 
 if __name__ == '__main__':
     app.run(port=8001, debug=True)

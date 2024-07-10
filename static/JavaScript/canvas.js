@@ -7,22 +7,11 @@ let scale = 1;
 
 // Pan functionality
 canvasContainer.addEventListener('mousedown', (e) => {
-    if (e.target.className === 'widget-container' || e.target.className === 'resize-handle' || e.target.className === 'drag-handle' || e.target.className === 'options-container' || e.target.className === 'delete-button' || e.target.className === 'widget-contents') {
-        if (e.altKey == false) {
-            return; // Exit the function if the text box is the target
-        }
-    }
-    if (isClickInsideElementWithClass(e, 'CodeMirror')) {
-        if (e.altKey == false) {
-            return; // Exit the function if the CodeMirror editor is the target
-        }
-    }
     if (isClickInsideElementWithClass(e, 'widget-container')) {
         if (e.altKey == false) {
             return; // Exit the function if the chat message box is the target
         }
     }
-
     if (e.button === 0) { // Left-click
         isPanning = true;
         startX = e.clientX - canvas.offsetLeft;
