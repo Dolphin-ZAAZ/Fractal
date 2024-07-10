@@ -108,15 +108,7 @@ class BaseWidget {
     makeDeletable() {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            if (document.body.contains(this.widgetContainer)) {
-                for (let i = 0; i < storedWidgets.length; i++) {
-                    if (storedWidgets[i] === this) {
-                        storedWidgets.splice(i, 1);
-                        storedStates.splice(i, 1);
-                    }
-                }
-                this.widgetContainer.remove();
-            }
+            deleteWidget(this);
         });
     }
 

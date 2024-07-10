@@ -81,6 +81,13 @@ def load_local_storage():
     local_storage_data = ss.get_local_storage()  # Load the local storage data from the file
     return jsonify(local_storage_data)  # Send the saved local storage data to the client
 
+@app.route('/data/delete-memory', methods=['POST'])
+def delete_memory():
+    data = request.json
+    chat_widget_id = data['chat_widget_id']
+    ss.delete_memory(chat_widget_id)
+    return '', 204
+
 
 def process_input(message, chat_widget_id):
     global start_logging

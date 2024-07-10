@@ -50,3 +50,15 @@ def get_memory_history():
         user_messages.append(message['message'])
         ai_responses.append(message['response'])
     return user_messages, ai_responses
+
+def delete_memory(id, saved_messages_path):
+    # Read the existing data
+    with open(saved_messages_path, 'r') as f:
+        memories = json.load(f)
+    
+    # Create a new list excluding the memory to delete
+    updated_memories = [memory for memory in memories if memory['chat_widget_id'] != id]
+    
+    # Write the updated list back to the file
+    with open(saved_messages_path, 'w') as f:
+        json.dump(updated_memories, f)

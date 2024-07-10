@@ -8,9 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: 'Clear Canvas', action: () => clearCanvas() }
     ];
 
-    function addWidget(x, y, widgetType) {
+    async function addWidget(x, y, widgetType) {
         const widget = new widgetTypes[widgetType](x, y, widgetType, 400, 300, "", true, actionLog.length);
         actionLog.push({ action: 'add', widget: widget.widgetState });
+        await saveData();
     }
 
     function createContextMenu(items) {

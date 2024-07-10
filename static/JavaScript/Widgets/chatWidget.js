@@ -2,10 +2,20 @@ let isRequestInProgress = false;
 class ChatWidget extends BaseWidget {
     constructor(x, y, widgetType, width, height, content, isNew = true, id = 0) {
         super(x, y, widgetType, width, height, content, isNew, id);
-        this.chatContainer = document.createElement('div');
+        if (!this.widgetContents.querySelector('.chat-container')) {
+            this.chatContainer = document.createElement('div');
+        }
+        else {
+            this.chatContainer = this.widgetContents.querySelector('.chat-container');
+        }
         this.chatContainer.className = 'chat-container';
         this.chatContainer.contentEditable = false;
-        this.chatLog = document.createElement('div');
+        if (!this.chatContainer.querySelector('.chat-log')) {
+            this.chatLog = document.createElement('div');
+        }
+        else {
+            this.chatLog = this.chatContainer.querySelector('.chat-log');
+        }
         this.chatLog.className = 'chat-log';
         this.chatContainer.appendChild(this.chatLog);
         this.widgetContents.appendChild(this.chatContainer);
