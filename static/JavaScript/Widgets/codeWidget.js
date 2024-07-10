@@ -1,7 +1,7 @@
 class CodeWidget extends BaseWidget {
     // Add widget functionality
-    constructor(x, y, widgetType, width, height, content, isNew = true) {
-        super(x, y, widgetType, width, height, '', isNew);
+    constructor(x, y, widgetType, width, height, content, isNew = true, id = 0) {
+        super(x, y, widgetType, width, height, '', isNew, id);
 
         this.padding = 80;
 
