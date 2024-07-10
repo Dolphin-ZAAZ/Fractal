@@ -116,7 +116,6 @@ function getWidgets() {
 }
 
 function setWidgets() {
-    console.log(storedWidgets);
     if (storedWidgets.length === 0) {
         localStorage.setItem('widgets', JSON.stringify([]));
     }

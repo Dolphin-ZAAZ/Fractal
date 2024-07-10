@@ -71,7 +71,6 @@ class ChatWidget extends BaseWidget {
         thinkingElement.classList.add('thinking');
         thinkingElement.textContent = 'Remembering...';
         this.chatLog.appendChild(thinkingElement);
-        console.log(this.widgetState.id);
         if (message) {
             thinkingElement.classList.add('thinking');
             thinkingElement.textContent = 'Thinking...';
