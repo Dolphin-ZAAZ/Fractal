@@ -28,6 +28,18 @@ canvasContainer.addEventListener('mousemove', (e) => {
     }
 });
 
+document.addEventListener('keydown', (e) => {
+    if (isClickInsideElementWithClass(e, 'widget-container')) {
+        if (e.altKey == false) {
+            return; // Exit the function if the chat message box is the target
+        }
+    }
+    if (e.key === 'f') {
+        canvas.style.left = '0';
+        canvas.style.top = '0';
+    }
+});
+
 canvasContainer.addEventListener('mouseup', () => {
     isPanning = false;
     canvasContainer.style.cursor = 'grab';
@@ -54,7 +66,7 @@ document.getElementById('canvas-container').addEventListener('wheel', (e) => {
 
     const zoomFactor = 0.03;
     let newScale = scale + (e.deltaY > 0 ? -zoomFactor : zoomFactor);
-    newScale = Math.max(0.1, newScale);
+    newScale = Math.max(0.01, newScale);
 
     const zoomRatio = newScale / scale;
 
@@ -71,16 +83,12 @@ document.getElementById('canvas-container').addEventListener('wheel', (e) => {
     canvas.style.left = `${canvas.offsetLeft + offsetX}px`;
     canvas.style.top = `${canvas.offsetTop + offsetY}px`;
 
-    scale = newScale;
-    updateAllWidgetsScale(newScale, initialMouseX, initialMouseY, zoomRatio);
+    scale = newScale;    
+    storedWidgets.forEach(widget => {
+        widget.updateScale(newScale, initialMouseX, initialMouseY, zoomRatio);
+    });
 
     // Reset initial mouse positions after zooming
     initialMouseX = null;
     initialMouseY = null;
 });
-// Update the scale for all widgets
-function updateAllWidgetsScale(newScale, mouseX, mouseY, zoomRatio) {
-    storedWidgets.forEach(widget => {
-        widget.updateScale(newScale, mouseX, mouseY, zoomRatio);
-    });
-}

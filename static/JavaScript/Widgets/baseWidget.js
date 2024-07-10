@@ -39,6 +39,7 @@ class BaseWidget {
             storedWidgetStates.push(this.widgetState);
         }
         this.updateWidgetState();
+        this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
     }
 
     createWidgetContainer(x, y, width, height) {
@@ -172,7 +173,6 @@ class BaseWidget {
     }
 
     updateIconifyStatus(height, width) {
-        console.log(height, width);
         const blockSize = 50;
         let minSize = widgetTypes[this.widgetState.widgetType].minSize;
         if (height < minSize || width < minSize) {
@@ -232,5 +232,6 @@ class BaseWidget {
 
         this.resizeContents(this.widgetState.padding);
         this.updateWidgetState();
+        this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
     }
 }
