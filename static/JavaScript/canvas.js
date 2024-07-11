@@ -1,98 +1,120 @@
-const canvasContainer = document.getElementById('canvas-container');
-const canvas = document.getElementById('canvas');
-const addWidgetButton = document.getElementById('add-widget');
-const infoPanel = document.getElementById('info-panel');
-let isPanning = false;
-let startX, startY;
-let scale = 1;
+class Canvas {
+    constructor() {
+        this.canvasContainer = document.getElementById('canvas-container');
+        this.canvas = document.getElementById('canvas');
+        this.addWidgetButton = document.getElementById('add-widget');
+        this.infoPanel = document.getElementById('info-panel');
+        this.initialMouseX = null;
+        this.initialMouseY = null;
+        this.initialRect = null;
+        this.isPanning = false;
+        this.startX, this.startY;
+        this.scale = 1;
+        this.addEvents();
+    }
 
+    addEvents() {
+        this.canvasContainer.addEventListener('mousedown', (e) => {
+            this.startPan(e);
+        });
 
-// Pan functionality
-canvasContainer.addEventListener('mousedown', (e) => {
-    if (isClickInsideElementWithClass(e, 'widget-container')) {
-        if (e.altKey == false) {
-            return; // Exit the function if the chat message box is the target
+        this.canvasContainer.addEventListener('mousemove', (e) => {
+            this.executePan(e);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            this.recentreCanvas(e);
+        });
+
+        this.canvasContainer.addEventListener('wheel', (e) => {
+            if (isClickInsideElementWithClass(e, 'widget-container')) {
+                if (e.altKey == false) {
+                    return; // Exit the function if the CodeMirror editor is the target
+                }
+            }
+            e.preventDefault();
+            this.zoomCanvas(e);
+        });
+        this.canvasContainer.addEventListener('mouseup', () => {
+            this.endPan(); // Re-enable pointer events on children
+        });
+    }
+
+    startPan(e) {
+        if (isClickInsideElementWithClass(e, 'widget-container')) {
+            if (e.altKey == false) {
+                return; // Exit the function if the chat message box is the target
+            }
+        }
+        if (e.button === 0) { // Left-click
+            this.isPanning = true;
+            this.startX = e.clientX - this.canvas.offsetLeft;
+            this.startY = e.clientY - this.canvas.offsetTop;
+            this.canvasContainer.style.cursor = 'grabbing';
+            this.canvas.style.pointerEvents = 'none'; // Disable pointer events on children
         }
     }
-    if (e.button === 0) { // Left-click
-        isPanning = true;
-        startX = e.clientX - canvas.offsetLeft;
-        startY = e.clientY - canvas.offsetTop;
-        canvasContainer.style.cursor = 'grabbing';
-        canvas.style.pointerEvents = 'none'; // Disable pointer events on children
-    }
-});
 
-canvasContainer.addEventListener('mousemove', (e) => {
-    if (isPanning) {
-        canvas.style.left = `${e.clientX - startX}px`;
-        canvas.style.top = `${e.clientY - startY}px`;
-    }
-});
-
-document.addEventListener('keydown', (e) => {
-    if (isClickInsideElementWithClass(e, 'widget-container')) {
-        if (e.altKey == false) {
-            return; // Exit the function if the chat message box is the target
+    recentreCanvas(e) {
+        if (isClickInsideElementWithClass(e, 'widget-container')) {
+            if (e.altKey == false) {
+                return; // Exit the function if the chat message box is the target
+            }
+        }
+        if (e.key === 'f') {
+            this.canvas.style.left = '0';
+            this.canvas.style.top = '0';
         }
     }
-    if (e.key === 'f') {
-        canvas.style.left = '0';
-        canvas.style.top = '0';
+
+    endPan() {
+        this.isPanning = false;
+        this.canvasContainer.style.cursor = 'grab';
+        this.canvas.style.pointerEvents = 'auto';
     }
-});
 
-canvasContainer.addEventListener('mouseup', () => {
-    isPanning = false;
-    canvasContainer.style.cursor = 'grab';
-    canvas.style.pointerEvents = 'auto'; // Re-enable pointer events on children
-});
-
-let initialMouseX = null;
-let initialMouseY = null;
-let initialRect = null;
-
-document.getElementById('canvas-container').addEventListener('wheel', (e) => {
-    if (isClickInsideElementWithClass(e, 'widget-container')) {
-        if (e.altKey == false) {
-            return; // Exit the function if the CodeMirror editor is the target
+    executePan(e) {
+        if (this.isPanning) {
+            this.canvas.style.left = `${e.clientX - this.startX}px`;
+            this.canvas.style.top = `${e.clientY - this.startY}px`;
         }
     }
-    e.preventDefault();
 
-    if (initialMouseX === null && initialMouseY === null) {
-        initialRect = canvas.getBoundingClientRect();
-        initialMouseX = e.clientX - initialRect.left;
-        initialMouseY = e.clientY - initialRect.top;
+    zoomCanvas(e) {
+        if (this.initialMouseX === null && this.initialMouseY === null) {
+            this.initialRect = this.canvas.getBoundingClientRect();
+            this.initialMouseX = e.clientX - this.initialRect.left;
+            this.initialMouseY = e.clientY - this.initialRect.top;
+        }
+
+        const zoomFactor = 0.01;
+        let newScale = this.scale + (e.deltaY > 0 ? -zoomFactor : zoomFactor);
+        newScale = Math.max(0.05, newScale);
+
+        const zoomRatio = newScale / this.scale;
+
+        // Adjust the canvas dimensions
+        const newWidth = this.initialRect.width * zoomRatio;
+        const newHeight = this.initialRect.height * zoomRatio;
+
+        // Calculate the new position to keep the zoom centered on the initial mouse position
+        const offsetX = this.initialMouseX * (1 - zoomRatio);
+        const offsetY = this.initialMouseY * (1 - zoomRatio);
+
+        this.canvas.style.width = `${newWidth}px`;
+        this.canvas.style.height = `${newHeight}px`;
+        this.canvas.style.left = `${this.canvas.offsetLeft + offsetX}px`;
+        this.canvas.style.top = `${this.canvas.offsetTop + offsetY}px`;
+
+        this.scale = newScale;
+        this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
+        storedWidgets.forEach(widget => {
+            widget.updateScale(newScale, this.initialMouseX, this.initialMouseY, zoomRatio);
+        });
+
+        // Reset initial mouse positions after zooming
+        this.initialMouseX = null;
+        this.initialMouseY = null;
+        addAction(actionTypes.zoom, this.canvas, { scale: this.scale, zoomRatio: zoomRatio });
     }
-
-    const zoomFactor = 0.01;
-    let newScale = scale + (e.deltaY > 0 ? -zoomFactor : zoomFactor);
-    newScale = Math.max(0.05, newScale);
-
-    const zoomRatio = newScale / scale;
-
-    // Adjust the canvas dimensions
-    const newWidth = initialRect.width * zoomRatio;
-    const newHeight = initialRect.height * zoomRatio;
-
-    // Calculate the new position to keep the zoom centered on the initial mouse position
-    const offsetX = initialMouseX * (1 - zoomRatio);
-    const offsetY = initialMouseY * (1 - zoomRatio);
-
-    canvas.style.width = `${newWidth}px`;
-    canvas.style.height = `${newHeight}px`;
-    canvas.style.left = `${canvas.offsetLeft + offsetX}px`;
-    canvas.style.top = `${canvas.offsetTop + offsetY}px`;
-
-    scale = newScale;    
-    infoPanel.innerHTML = `Scale: ${Math.round(scale * 100)}%`;
-    storedWidgets.forEach(widget => {
-        widget.updateScale(newScale, initialMouseX, initialMouseY, zoomRatio);
-    });
-
-    // Reset initial mouse positions after zooming
-    initialMouseX = null;
-    initialMouseY = null;
-    addAction(actionTypes.zoom, this.canvas, { scale: scale, zoomRatio: zoomRatio });
-});
+}

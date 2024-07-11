@@ -7,6 +7,7 @@ const actionTypes = {
     pan: undoPan,
     clear: undoClear
 }
+
 let actionLog = [];
 let currentAction = 0;
 
@@ -45,4 +46,58 @@ function undoAdd() {
     if (lastAction) {
         lastAction.target.remove();
     }
+}
+
+function undoDelete() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.restore();
+    }
+}
+
+function undoMove() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.move(lastAction.changes.x, lastAction.changes.y);
+    }
+}
+
+function undoResize() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.resize(lastAction.changes.width, lastAction.changes.height);
+    }
+}
+
+function undoZoom() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.zoom(lastAction.changes.scale, lastAction.changes.zoomRatio);
+    }
+}
+
+function undoPan() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.pan(lastAction.changes.x, lastAction.changes.y);
+    }
+}
+
+function undoClear() {
+    const lastAction = undoAction();
+    if (lastAction) {
+        lastAction.target.clear();
+    }
+}
+
+function redo() {
+    const nextAction = redoAction();
+    if (nextAction) {
+        actionTypes[nextAction.action]();
+    }
+}
+
+function clearLog() {
+    actionLog = [];
+    saveActionLog(actionLog);
 }

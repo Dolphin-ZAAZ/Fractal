@@ -217,7 +217,7 @@ class BaseWidget {
     }
 
     updateScale(newScale, mouseX, mouseY, zoomRatio) {
-        const rect = canvas.getBoundingClientRect();
+        const rect = this.canvas.getBoundingClientRect();
         const canvasX = this.widgetContainer.getBoundingClientRect().left - rect.left;
         const canvasY = this.widgetContainer.getBoundingClientRect().top - rect.top;
 
