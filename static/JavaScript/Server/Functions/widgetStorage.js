@@ -25,7 +25,7 @@ function setWidgets() {
 
 function deleteWidget(widget) {
     if (document.body.contains(widget.widgetContainer)) {
-        actionLog.push({ action: 'delete', widget: storedWidgets[storedWidgets.length - 1].widgetState });
+        addAction(actionTypes.delete, widget, {});
         for (let i = 0; i < storedWidgets.length; i++) {
             if (storedWidgets[i] === widget) {
                 storedWidgets.splice(i, 1);

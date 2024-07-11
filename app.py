@@ -88,7 +88,6 @@ def delete_memory():
     ss.delete_memory(chat_widget_id)
     return '', 204
 
-
 def process_input(message, chat_widget_id):
     global start_logging
     start_logging = True

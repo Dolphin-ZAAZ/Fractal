@@ -1,9 +1,11 @@
 const canvasContainer = document.getElementById('canvas-container');
 const canvas = document.getElementById('canvas');
 const addWidgetButton = document.getElementById('add-widget');
+const infoPanel = document.getElementById('info-panel');
 let isPanning = false;
 let startX, startY;
 let scale = 1;
+
 
 // Pan functionality
 canvasContainer.addEventListener('mousedown', (e) => {
@@ -64,9 +66,9 @@ document.getElementById('canvas-container').addEventListener('wheel', (e) => {
         initialMouseY = e.clientY - initialRect.top;
     }
 
-    const zoomFactor = 0.03;
+    const zoomFactor = 0.01;
     let newScale = scale + (e.deltaY > 0 ? -zoomFactor : zoomFactor);
-    newScale = Math.max(0.01, newScale);
+    newScale = Math.max(0.05, newScale);
 
     const zoomRatio = newScale / scale;
 
@@ -84,6 +86,7 @@ document.getElementById('canvas-container').addEventListener('wheel', (e) => {
     canvas.style.top = `${canvas.offsetTop + offsetY}px`;
 
     scale = newScale;    
+    infoPanel.innerHTML = `Scale: ${Math.round(scale * 100)}%`;
     storedWidgets.forEach(widget => {
         widget.updateScale(newScale, initialMouseX, initialMouseY, zoomRatio);
     });
@@ -91,4 +94,5 @@ document.getElementById('canvas-container').addEventListener('wheel', (e) => {
     // Reset initial mouse positions after zooming
     initialMouseX = null;
     initialMouseY = null;
+    addAction(actionTypes.zoom, this.canvas, { scale: scale, zoomRatio: zoomRatio });
 });

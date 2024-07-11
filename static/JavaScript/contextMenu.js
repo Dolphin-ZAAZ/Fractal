@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function addWidget(x, y, widgetType) {
         const widget = new widgetTypes[widgetType]["type"](x, y, widgetType.type, 400, 300, 80, "", true, actionLog.length);
-        actionLog.push({ action: 'add', widget: widget.widgetState });
+        addAction(actionTypes.add, widget, {position: {x:x, y:y}, widgetType});
         await saveData();
     }
 
