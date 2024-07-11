@@ -17,6 +17,7 @@ function getWidgets() {
 function setWidgets() {
     if (storedWidgets.length === 0) {
         localStorage.setItem('widgets', JSON.stringify([]));
+        setInitialState();
     }
     for (let i = 0; i < storedWidgets.length; i++) {
         storedWidgetStates[i] = storedWidgets[i].widgetState;
@@ -25,14 +26,14 @@ function setWidgets() {
 }
 
 async function addWidget(x, y, widgetType) {
+    setInitialState();
     const widget = new widgetTypes[widgetType]["type"](x, y, widgetType.type, 400, 300, 80, "", true, actionLog.length);
-    logAction(actionTypes.add, widget, deleteWidget);
     await saveData();
 }
 
 function deleteWidget(widget) {
     if (document.body.contains(widget.widgetContainer)) {
-        logAction(actionTypes.delete, widget, addWidget);
+        setInitialState();
         for (let i = 0; i < storedWidgets.length; i++) {
             if (storedWidgets[i] === widget) {
                 storedWidgets.splice(i, 1);

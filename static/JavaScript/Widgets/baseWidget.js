@@ -115,6 +115,7 @@ class BaseWidget {
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
+            setInitialState();
             const startX = e.clientX;
             const startY = e.clientY;
             const startLeft = parseInt(this.widgetContainer.style.left, 10);
@@ -134,9 +135,9 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                logAction(actionTypes.move, this, {startX : startX, startY : startY, endX : this.widgetState.x, endY : this.widgetState.y});
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
+                saveData();
             }, { once: true });
         });
     }
@@ -144,6 +145,7 @@ class BaseWidget {
     makeResizable() {
         this.resizeHandle.addEventListener('mousedown', (e) => {
             e.stopPropagation();
+            setInitialState();
             const startX = e.clientX;
             const startY = e.clientY;
             const startWidth = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
@@ -161,7 +163,7 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                logAction(actionTypes.resize, this, {startWidth : startWidth, startHeight : startHeight, endWidth : this.widgetState.width, endHeight : this.widgetState.height})
+                saveData();
             }, { once: true });
         });
     }

@@ -1,2 +1,6 @@
-const mainCanvas = new Canvas();
-const contextMenu = new ContextMenu();
+let mainCanvas;
+let contextMenu;
+document.addEventListener('DOMContentLoaded', () => {
+    mainCanvas = new Canvas();
+    contextMenu = new ContextMenu();
+});

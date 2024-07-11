@@ -1,6 +1,5 @@
 class ContextMenu {
     constructor() {
-        
         this.mouseX = 0;
         this.mouseY = 0;
         this.menuItems = [
