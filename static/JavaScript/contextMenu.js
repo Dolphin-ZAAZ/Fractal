@@ -1,20 +1,20 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let mouseX = 0, mouseY = 0;
-    
-    const menuItems = [
-        { text: 'Add Chat Box', action: (x,y) => addWidget(x,y, 'ChatWidget')},
-        { text: 'Add Text Box', action: (x,y) => addWidget(x,y, 'BaseWidget') },
-        { text: 'Add Code Box', action: (x,y) => addWidget(x,y, 'CodeWidget') },
-        { text: 'Clear Canvas', action: () => clearCanvas() }
-    ];
-
-    async function addWidget(x, y, widgetType) {
-        const widget = new widgetTypes[widgetType]["type"](x, y, widgetType.type, 400, 300, 80, "", true, actionLog.length);
-        addAction(actionTypes.add, widget, {position: {x:x, y:y}, widgetType});
-        await saveData();
+class ContextMenu {
+    constructor() {
+        
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.menuItems = [
+            { text: 'Add Chat Box', action: (x,y) => addWidget(x,y, 'ChatWidget')},
+            { text: 'Add Text Box', action: (x,y) => addWidget(x,y, 'BaseWidget') },
+            { text: 'Add Code Box', action: (x,y) => addWidget(x,y, 'CodeWidget') },
+            { text: 'Clear Canvas', action: () => clearCanvas() }
+        ];
+        this.showContextMenu = this.showContextMenu.bind(this);
+        this.hideContextMenu = this.hideContextMenu.bind(this);
+        this.addEvents();
     }
 
-    function createContextMenu(items) {
+    createContextMenu(items) {
         const contextMenu = document.getElementById('context-menu');
         const menuList = contextMenu.querySelector('.context-menu-list');
 
@@ -24,32 +24,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const menuItem = document.createElement('li');
             menuItem.className = 'context-menu-item';
             menuItem.textContent = item.text;
-            menuItem.addEventListener('click', () => item.action(mouseX, mouseY));
+            menuItem.addEventListener('click', () => item.action(this.mouseX, this.mouseY));
             menuList.appendChild(menuItem);
         });
 
         return contextMenu;
     }
 
-    function showContextMenu(event) {
+    showContextMenu(event) {
         event.preventDefault();
 
-        mouseX = event.pageX; // Capture mouse position
-        mouseY = event.pageY;
+        this.mouseX = event.pageX; // Capture mouse position
+        this.mouseY = event.pageY;
 
-        const contextMenu = createContextMenu(menuItems);
+        const contextMenu = this.createContextMenu(this.menuItems);
         contextMenu.style.left = `${event.pageX}px`;
         contextMenu.style.top = `${event.pageY}px`;
         contextMenu.style.display = 'block';
-
-        document.addEventListener('click', hideContextMenu);
+        document.addEventListener('click', this.hideContextMenu);
     }
 
-    function hideContextMenu() {
+    hideContextMenu() {
         const contextMenu = document.getElementById('context-menu');
         contextMenu.style.display = 'none';
-        document.removeEventListener('click', hideContextMenu);
+        document.removeEventListener('click', this.hideContextMenu);
     }
 
-    document.addEventListener('contextmenu', showContextMenu);
-});
+    addEvents()
+    {
+        document.addEventListener('contextmenu', this.showContextMenu);
+    }
+}

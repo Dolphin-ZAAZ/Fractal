@@ -134,7 +134,7 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                addAction(actionTypes.move, this, {startX : startX, startY : startY, endX : this.widgetState.x, endY : this.widgetState.y});
+                logAction(actionTypes.move, this, {startX : startX, startY : startY, endX : this.widgetState.x, endY : this.widgetState.y});
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
             }, { once: true });
@@ -161,7 +161,7 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                addAction(actionTypes.resize, this, {startWidth : startWidth, startHeight : startHeight, endWidth : this.widgetState.width, endHeight : this.widgetState.height})
+                logAction(actionTypes.resize, this, {startWidth : startWidth, startHeight : startHeight, endWidth : this.widgetState.width, endHeight : this.widgetState.height})
             }, { once: true });
         });
     }

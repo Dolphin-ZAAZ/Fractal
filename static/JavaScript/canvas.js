@@ -115,6 +115,6 @@ class Canvas {
         // Reset initial mouse positions after zooming
         this.initialMouseX = null;
         this.initialMouseY = null;
-        addAction(actionTypes.zoom, this.canvas, { scale: this.scale, zoomRatio: zoomRatio });
+        logAction(actionTypes.zoom, this, { scale: this.scale, zoomRatio: zoomRatio });
     }
 }

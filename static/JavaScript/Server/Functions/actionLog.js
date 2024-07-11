@@ -1,3 +1,5 @@
+let actionLog = [];
+let currentAction = 0;
 const actionTypes = {
     add: undoAdd,
     delete: undoDelete,
@@ -5,11 +7,23 @@ const actionTypes = {
     resize: undoResize,
     zoom: undoZoom,
     pan: undoPan,
+    edit: undoEdit,
     clear: undoClear
 }
 
-let actionLog = [];
-let currentAction = 0;
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'z') {
+        undoAction();
+    } else if (e.ctrlKey && e.key === 'y') {
+        redoAction();
+    }
+});
+
+function logAction(action, target, changes) {
+    actionLog.push({ action:action, target:target, changes: changes });
+    currentAction = actionLog.length;
+    saveActionLog(actionLog);
+}
 
 function getActionLog() {
     const actionLog = localStorage.getItem('actionLog');
@@ -19,75 +33,22 @@ function getActionLog() {
     return [];
 }
 
-function addAction(action, target, changes) {
-    actionLog.push({ action:action, target:target, changes: changes });
-    currentAction = actionLog.length;
-    saveActionLog(actionLog);
-}
-
-function saveActionLog(actionLog) {
-    localStorage.setItem('actionLog', JSON.stringify(actionLog));
-}
-
 function undoAction() {
     const lastAction = actionLog.pop();
+    lastAction.changes(lastAction.target);
     saveActionLog(actionLog);
     return lastAction;
 }
 
 function redoAction() {
     const nextAction = actionLog.pop();
+    nextAction.changes(nextAction.target);
     saveActionLog(actionLog);
     return nextAction;
 }
 
-function undoAdd() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.remove();
-    }
-}
-
-function undoDelete() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.restore();
-    }
-}
-
-function undoMove() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.move(lastAction.changes.x, lastAction.changes.y);
-    }
-}
-
-function undoResize() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.resize(lastAction.changes.width, lastAction.changes.height);
-    }
-}
-
-function undoZoom() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.zoom(lastAction.changes.scale, lastAction.changes.zoomRatio);
-    }
-}
-
-function undoPan() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.pan(lastAction.changes.x, lastAction.changes.y);
-    }
-}
-
-function undoClear() {
-    const lastAction = undoAction();
-    if (lastAction) {
-        lastAction.target.clear();
-    }
+function saveActionLog(actionLog) {
+    localStorage.setItem('actionLog', JSON.stringify(actionLog));
 }
 
 function redo() {

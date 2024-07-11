@@ -1,5 +1,6 @@
 let storedWidgets = [];
 let storedWidgetStates = [];
+let widgetTypes = {};
 
 function getWidgets() {
     const widgets = localStorage.getItem('widgets');
@@ -23,9 +24,15 @@ function setWidgets() {
     localStorage.setItem('widgets', JSON.stringify(storedWidgetStates));
 }
 
+async function addWidget(x, y, widgetType) {
+    const widget = new widgetTypes[widgetType]["type"](x, y, widgetType.type, 400, 300, 80, "", true, actionLog.length);
+    logAction(actionTypes.add, widget, deleteWidget);
+    await saveData();
+}
+
 function deleteWidget(widget) {
     if (document.body.contains(widget.widgetContainer)) {
-        addAction(actionTypes.delete, widget, {});
+        logAction(actionTypes.delete, widget, addWidget);
         for (let i = 0; i < storedWidgets.length; i++) {
             if (storedWidgets[i] === widget) {
                 storedWidgets.splice(i, 1);
@@ -44,3 +51,20 @@ function deleteWidget(widget) {
         })();
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    widgetTypes = {
+        'BaseWidget': { 
+            "type" : BaseWidget, 
+            minSize : 110,
+        },
+        'CodeWidget': {
+            "type" : CodeWidget, 
+            minSize : 110,
+        },
+        'ChatWidget': {
+            "type" : ChatWidget, 
+            minSize : 110,
+        },
+    }
+});
