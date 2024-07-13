@@ -33,11 +33,6 @@ class BaseWidget {
         this.appendToCanvas();
         this.appendElements();
         this.addWidgetEvents();
-        
-        if (isNew) {
-            storedWidgets.push(this);
-            storedWidgetStates.push(this.widgetState);
-        }
         this.updateWidgetState();
         this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
     }
@@ -109,13 +104,12 @@ class BaseWidget {
     makeDeletable() {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            deleteWidget(this);
+            widgetManager.deleteWidget(this);
         });
     }
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
-            setInitialState();
             const startX = e.clientX;
             const startY = e.clientY;
             const startLeft = parseInt(this.widgetContainer.style.left, 10);
@@ -137,7 +131,6 @@ class BaseWidget {
                 document.removeEventListener('mousemove', onMouseMove);
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
-                saveData();
             }, { once: true });
         });
     }
@@ -145,7 +138,6 @@ class BaseWidget {
     makeResizable() {
         this.resizeHandle.addEventListener('mousedown', (e) => {
             e.stopPropagation();
-            setInitialState();
             const startX = e.clientX;
             const startY = e.clientY;
             const startWidth = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
@@ -163,7 +155,6 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                saveData();
             }, { once: true });
         });
     }
@@ -178,7 +169,7 @@ class BaseWidget {
 
     updateIconifyStatus(height, width) {
         const blockSize = 50;
-        let minSize = widgetTypes[this.widgetState.widgetType].minSize;
+        let minSize = widgetManager.widgetTypes[this.widgetState.widgetType].minSize;
         if (height < minSize || width < minSize) {
             this.widgetContents.classList.add('hidden');
             this.optionsContainer.classList.add('hidden');
@@ -216,6 +207,14 @@ class BaseWidget {
         this.widgetState.width = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
         this.widgetState.height = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
         this.widgetState.content = this.widgetContents.innerHTML;
+    }
+
+    getWidgetState() {
+        return this.widgetState;
+    }
+
+    setWidgetState(widget) {
+        this.widgetState = widget.widgetState;
     }
 
     updateScale(newScale, mouseX, mouseY, zoomRatio) {

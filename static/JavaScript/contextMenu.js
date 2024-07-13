@@ -3,10 +3,10 @@ class ContextMenu {
         this.mouseX = 0;
         this.mouseY = 0;
         this.menuItems = [
-            { text: 'Add Chat Box', action: (x,y) => addWidget(x,y, 'ChatWidget')},
-            { text: 'Add Text Box', action: (x,y) => addWidget(x,y, 'BaseWidget') },
-            { text: 'Add Code Box', action: (x,y) => addWidget(x,y, 'CodeWidget') },
-            { text: 'Clear Canvas', action: () => clearCanvas() }
+            { text: 'Add Chat Box', action: (x, y) => widgetManager.addWidget(x, y, 'ChatWidget') },
+            { text: 'Add Text Box', action: (x, y) => widgetManager.addWidget(x, y, 'BaseWidget') },
+            { text: 'Add Code Box', action: (x, y) => widgetManager.addWidget(x, y, 'CodeWidget') },
+            { text: 'Clear Canvas', action: () => widgetManager.clearCanvas() } // Assuming clearCanvas() is not async
         ];
         this.showContextMenu = this.showContextMenu.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);

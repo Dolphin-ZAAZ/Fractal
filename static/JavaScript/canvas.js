@@ -67,6 +67,14 @@ class Canvas {
         }
     }
 
+    getCanvasStyle() {
+        return this.canvas.style;
+    }
+
+    setCanvasStyle(style) {
+        this.canvas.style = style;
+    }
+
     endPan() {
         this.isPanning = false;
         this.canvasContainer.style.cursor = 'grab';
@@ -108,6 +116,7 @@ class Canvas {
 
         this.scale = newScale;
         this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
+        const storedWidgets = widgetManager.getStoredWidgets();
         storedWidgets.forEach(widget => {
             widget.updateScale(newScale, this.initialMouseX, this.initialMouseY, zoomRatio);
         });
@@ -115,6 +124,5 @@ class Canvas {
         // Reset initial mouse positions after zooming
         this.initialMouseX = null;
         this.initialMouseY = null;
-        logAction(zoomCanvas, this, { scale: this.scale, zoomRatio: zoomRatio });
     }
 }

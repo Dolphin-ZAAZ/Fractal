@@ -68,14 +68,14 @@ def get_history():
 
 local_storage_data = {}
 
-@app.route('/data/set-local-storage', methods=['POST'])
+@app.route('/data/set-widget-storage', methods=['POST'])
 def save_local_storage():
     global local_storage_data
     local_storage_data = json.loads(request.data) # Get the data sent from the client
     ss.set_local_storage(local_storage_data)  # Save the data to the local storage file
     return '', 204
 
-@app.route('/data/get-local-storage', methods=['GET'])
+@app.route('/data/get-widget-storage', methods=['GET'])
 def load_local_storage():
     global local_storage_data
     local_storage_data = ss.get_local_storage()  # Load the local storage data from the file

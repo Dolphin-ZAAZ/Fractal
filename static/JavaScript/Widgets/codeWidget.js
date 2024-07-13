@@ -34,7 +34,9 @@ class CodeWidget extends BaseWidget {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
             this.updateWidgetState();
         });
-        this.editor.setOption("value", content);
+        if (content && content != '') {
+            this.editor.setOption("value", content);
+        }
         languageSelector.addEventListener('change', () => {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
             this.updateWidgetState();
