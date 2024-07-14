@@ -112,7 +112,7 @@ class BaseWidget {
     makeDeletable() {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            widgetManager.deleteWidget(this);
+            widgetManager.removeWidget(this.widgetState.id);
         });
     }
 
@@ -140,7 +140,7 @@ class BaseWidget {
                 document.removeEventListener('mousemove', onMouseMove);
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
-                widgetManager.updateWidget(this);
+                widgetManager.updateWidgetState(this.widgetState.id);
             }, { once: true });
         });
     }

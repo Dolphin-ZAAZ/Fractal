@@ -4,9 +4,8 @@ class WidgetManager {
         this.ids = [];
         this.storedWidgets = [];
         this.storedWidgetStates = [];
-        this.actionStack = [];
-        this.actionIndex = 0;
-        this.currentState = [];
+        this.states = {};
+        this.stateNumber = 0;
         this.widgetTypes = {
             'BaseWidget': BaseWidget,
             'ChatWidget': ChatWidget,
@@ -20,11 +19,6 @@ class WidgetManager {
             }
         });
     }
-    
-    getStateCopy() {
-        const initialStates = [...this.storedWidgetStates];
-        return initialStates;
-    }
 
     generateRandomUniqueID() {
         let id = Math.floor(Math.random() * 1000000);
@@ -35,120 +29,92 @@ class WidgetManager {
         return id;
     }
 
-    addWidget(x, y, type) {
-        const storedWidgetStatesCopy = this.getStateCopy();
-        this.currentState = storedWidgetStatesCopy; 
-        const widget = new this.widgetTypes[type](x, y);
+    addWidget(x, y, widgetType) {
+        const widget = new this.widgetTypes[widgetType](x, y, widgetType, 300, 200, 10, '', true, this.generateRandomUniqueID(), false);
         this.storedWidgets.push(widget);
-        this.storedWidgetStates.push(widget.widgetState);
-        const newStoredWidgetStates = this.getStateCopy();
-        this.addItemActionState(widget.widgetState.id, this.currentState, newStoredWidgetStates);
-        this.updateLocalStorage();
-        return widget;
+        this.storedWidgetStates.push(widget.getWidgetState());
+        this.addState();
     }
 
-    updateWidget(widget) {
-        return;
-    }
-
-    deleteWidget(widget) {
-        const storedWidgetStatesCopy = this.getStateCopy();
-        this.currentState = storedWidgetStatesCopy;
-        this.storedWidgets = this.storedWidgets.filter(w => w.widgetState.id !== widget.widgetState.id);
-        this.storedWidgetStates = this.storedWidgetStates.filter(w => w.id !== widget.widgetState.id);
-        const newStoredWidgetStates = this.getStateCopy();
+    removeWidget(id) {
+        const widget = this.storedWidgets.find(widget => widget.widgetState.id === id);
+        const index = this.storedWidgets.indexOf(widget);
+        this.storedWidgets.splice(index, 1);
+        this.storedWidgetStates.splice(index, 1);
         widget.widgetContainer.remove();
-        this.addItemActionState(widget.widgetState.id, this.currentState, newStoredWidgetStates);
-        this.updateLocalStorage();
+        this.addState();
     }
 
-    getStoredWidgets() {
-        return this.storedWidgets;
+    updateWidgetState(id) {
+        const widget = this.storedWidgets.find(widget => widget.widgetState.id === id);
+        const index = this.storedWidgets.indexOf(widget);
+        this.storedWidgetStates[index] = widget.getWidgetState();
+        this.addState();
     }
 
-    addItemActionState(id = 0, initialState, finalState, canvasAction = false) {
-        if (this.actionIndex < this.actionStack.length) {
-            this.actionStack = this.actionStack.slice(0, this.actionIndex);
-        }
-        if (canvasAction) { 
-            this.actionStack.push({ id : id, initialState : initialState, finalState : finalState, canvasAction : canvasAction});
-            if (this.actionStack.length > 0) {
-                this.actionIndex = this.actionStack.length;
+    addState() {
+        const stateNumber = JSON.stringify(this.stateNumber);
+        const widgetStates = JSON.stringify(this.storedWidgetStates);
+        const canvasState = JSON.stringify(this.canvas.getCanvasStyle());
+        Object.keys(this.states).forEach(key => {
+            if (parseInt(key) > this.stateNumber) {
+                delete this.states[key];
             }
+        });
+        this.states[stateNumber] = { widgetStates : widgetStates, canvasState : canvasState };
+        localStorage.setItem('states', JSON.stringify(this.states));
+        localStorage.setItem('stateNumber', JSON.stringify(this.stateNumber));
+        this.stateNumber++;
+        this.postStates();
+    }
+
+    loadState(stateNumber) {
+        const states = JSON.parse(localStorage.getItem('states'));
+        const state = states[stateNumber];
+        if (!state) {
+            this.resetCanvas(); 
             return;
         }
-        this.actionStack.push({ id : id, initialState : initialState, finalState : finalState, canvasAction : canvasAction});
-        if (this.actionStack.length > 0) {
-            this.actionIndex = this.actionStack.length;
-        }
+        const widgetStates = JSON.parse(state.widgetStates);
+        const canvasState = JSON.parse(state.canvasState);
+        this.canvas.setCanvasStyle(canvasState);
+        this.storedWidgetStates = widgetStates;
+        this.storedWidgets.forEach(widget => {
+            widget.widgetContainer.remove();
+        });
+        this.storedWidgets = [];
+        widgetStates.forEach(widgetState => {
+            const widget = new this.widgetTypes[widgetState.widgetType](widgetState.x, widgetState.y, widgetState.widgetType, widgetState.width, widgetState.height, widgetState.padding, widgetState.content, false, widgetState.id, widgetState.isMinimized);
+            this.storedWidgets.push(widget);
+        });
+        localStorage.setItem('stateNumber', JSON.stringify(stateNumber));
     }
-
+    
     undo() {
-        if (this.actionIndex === 0) { return; }
-        if (this.actionStack[this.actionIndex - 1].canvasAction) { this.actionIndex -= 1; this.canvas.setCanvasStyle(this.actionStack[this.actionIndex].initialState); return; }
-        this.resetWidgets();
-        this.actionIndex -= 1;
-        if (this.actionStack.length < 2 || this.actionIndex <= 0) { this.actionIndex = 0; this.updateLocalStorage(); return;}
-        this.storedWidgetStates = [...this.actionStack[this.actionIndex].initialState];
-        this.renderWidgets();
+        if (this.stateNumber > 0) {
+            this.stateNumber--;
+            this.loadState(this.stateNumber - 1);
+        }
     }
 
     redo() {
-        if (this.actionIndex === this.actionStack.length) { return; }
-        if (this.actionStack[this.actionIndex].canvasAction) { this.actionIndex += 1; this.canvas.setCanvasStyle(this.actionStack[this.actionIndex - 1].finalState); return; }
-        this.actionIndex += 1;
-        if (this.actionStack.length < this.actionIndex) { this.actionIndex = this.actionStack.length; return; }
-        this.resetWidgets();
-        this.storedWidgetStates = [...this.actionStack[this.actionIndex - 1].finalState];
-        this.renderWidgets();
-    }
-
-    renderWidgets() {
-        this.storedWidgetStates.forEach(widget => {
-            const newWidget = new this.widgetTypes[widget.widgetType](widget.x, widget.y, widget.widgetType, widget.width, widget.height, widget.padding, widget.content, false, widget.id, widget.isMinimized);
-            this.storedWidgets.push(newWidget);
-            this.updateLocalStorage();
-        });
-    }
-
-    updateLocalStorage() {
-        localStorage.setItem('widgets', JSON.stringify(this.storedWidgetStates));
-        localStorage.setItem('actionStack', JSON.stringify(this.actionStack));
-        localStorage.setItem('actionIndex', JSON.stringify(this.actionIndex));
-        localStorage.setItem('canvasStyle', JSON.stringify(this.canvas.getCanvasStyle()));
-        this.postWidgets();
-    }
-
-    loadWidgets() {
-        const storedWidgets = JSON.parse(localStorage.getItem('widgets'));
-        if (storedWidgets) {
-            for (let i = 0; i < storedWidgets.length; i++) {
-                const widget = storedWidgets[i];
-                const newWidget = new this.widgetTypes[widget.widgetType](widget.x, widget.y, widget.widgetType, widget.width, widget.height, widget.padding, widget.content, false, widget.id, widget.isMinimized);
-                this.storedWidgets.push(newWidget);
-                this.storedWidgetStates.push(newWidget.widgetState);
-            }
-            this.actionIndex = JSON.parse(localStorage.getItem('actionIndex'));
-            this.actionStack = JSON.parse(localStorage.getItem('actionStack'));
-            this.canvas.setCanvasStyle(JSON.parse(localStorage.getItem('canvasStyle')));
+        if (this.stateNumber < Object.keys(this.states).length) {
+            this.stateNumber++;
+            this.loadState(this.stateNumber - 1);
         }
     }
 
-    resetWidgets() {
+    resetCanvas() {
         this.storedWidgets.forEach(widget => {
             widget.widgetContainer.remove();
         });
         this.storedWidgets = [];
         this.storedWidgetStates = [];
+        this.stateNumber = 0;
     }
 
-    postWidgets() {
-        let saveData = {}
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            saveData[key] = value;
-        }
+    postStates() {
+        let saveData = {stateNumber : this.stateNumber, states : this.states};
         const data = JSON.stringify(saveData);
         const blob = new Blob([data], {type: 'application/json'});
         const url = '/data/set-widget-storage';
@@ -184,11 +150,9 @@ class WidgetManager {
                 throw new Error('Failed to get widgets');
             }
             const storageData = await response.json(); // Ensure this is awaited
-            Object.keys(storageData).forEach(key => {
-                // Assuming storageData[key] is already a string; otherwise, JSON.stringify it
-                localStorage.setItem(key, storageData[key]);
-            });
-            this.loadWidgets();
+            localStorage.setItem('states', JSON.stringify(storageData.states));
+            localStorage.setItem('stateNumber', JSON.stringify(storageData.stateNumber));
+            this.loadState(JSON.parse(localStorage.getItem('stateNumber'))-1);
         } catch (error) {
             console.error(error);
         }
@@ -203,6 +167,9 @@ class WidgetManager {
         this.actionStack = [];
         this.currentState = [];
         localStorage.clear();
-        this.postWidgets();
+    }
+
+    getStoredWidgets() {
+        return this.storedWidgets;
     }
 }

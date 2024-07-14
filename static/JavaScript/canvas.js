@@ -17,7 +17,6 @@ class Canvas {
     addEvents() {
         this.canvasContainer.addEventListener('mousedown', (e) => {
             this.startPan(e);
-            this.currentState = this.getCanvasStyle();
         });
 
         this.canvasContainer.addEventListener('mousemove', (e) => {
@@ -26,7 +25,6 @@ class Canvas {
 
         document.addEventListener('keydown', (e) => {
             this.recentreCanvas(e);
-            widgetManager.updateLocalStorage();
         });
 
         this.canvasContainer.addEventListener('wheel', (e) => {
@@ -37,21 +35,9 @@ class Canvas {
             }
             e.preventDefault();
             this.zoomCanvas(e);
-            if (Math.round(this.scale * 100) % 10 === 0) {
-                if (this.currentState.left !== this.getCanvasStyleCSS().left || this.currentState.top !== this.getCanvasStyle().top) {
-                    widgetManager.addItemActionState(this.currentState, this.getCanvasStyle(), true);
-                }
-                this.currentState = this.getCanvasStyle();
-                widgetManager.updateLocalStorage();
-            }
         });
         this.canvasContainer.addEventListener('mouseup', () => {
             this.endPan(); // Re-enable pointer events on children
-            if (this.currentState.left !== this.getCanvasStyle().left || this.currentState.top !== this.getCanvasStyle().top) {
-                widgetManager.addItemActionState(this.currentState, this.getCanvasStyle(), true);
-            }
-            this.currentState = this.getCanvasStyle();
-            widgetManager.updateLocalStorage();
         });
     }
 
