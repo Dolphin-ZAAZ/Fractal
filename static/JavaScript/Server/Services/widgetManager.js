@@ -53,6 +53,7 @@ class WidgetManager {
     }
 
     addState() {
+        if (this.states[0]) { if (this.canvas.getCanvasStyle().left === JSON.parse(this.states[this.stateNumber - 1].canvasState).left || this.canvas.getCanvasStyle().top === JSON.parse(this.states[this.stateNumber - 1].canvasState).top) {return;} }
         const stateNumber = JSON.stringify(this.stateNumber);
         const widgetStates = JSON.stringify(this.storedWidgetStates);
         const canvasState = JSON.stringify(this.canvas.getCanvasStyle());

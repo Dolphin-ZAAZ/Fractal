@@ -87,6 +87,7 @@ class Canvas {
         this.isPanning = false;
         this.canvasContainer.style.cursor = 'grab';
         this.canvas.style.pointerEvents = 'auto';
+        widgetManager.addState();
     }
 
     executePan(e) {

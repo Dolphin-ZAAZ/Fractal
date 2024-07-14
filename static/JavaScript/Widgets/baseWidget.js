@@ -105,6 +105,7 @@ class BaseWidget {
             {
                 console.log('updating widget state');
                 this.characterCount = 0;
+                widgetManager.updateWidgetState(this.widgetState.id);
             }
         });
     }
@@ -165,6 +166,7 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
+                widgetManager.updateWidgetState(this.widgetState.id);
             }, { once: true });
         });
     }
@@ -185,12 +187,14 @@ class BaseWidget {
             this.optionsContainer.classList.add('hidden');
             this.resizeWidget(width, 0, height, 0);
             this.widgetState.isMinimized = true;
+            widgetManager.updateWidgetState(this.widgetState.id);
         }
         if (this.widgetState.isMinimized && height >= minSize && width >= minSize) {
             this.widgetContents.classList.remove('hidden');
             this.optionsContainer.classList.remove('hidden');
             this.resizeWidget(minSize + 20, 0, minSize + 20, 0);
             this.widgetState.isMinimized = false;
+            widgetManager.updateWidgetState(this.widgetState.id);
         }
         if (height <= blockSize || width <= blockSize) {
             this.resizeWidget(blockSize, 0, blockSize, 0);
