@@ -2,6 +2,7 @@ class Canvas {
     constructor() {
         this.canvasContainer = document.getElementById('canvas-container');
         this.canvas = document.getElementById('canvas');
+        this.currentState = [];
         this.addWidgetButton = document.getElementById('add-widget');
         this.infoPanel = document.getElementById('info-panel');
         this.initialMouseX = null;
@@ -16,6 +17,7 @@ class Canvas {
     addEvents() {
         this.canvasContainer.addEventListener('mousedown', (e) => {
             this.startPan(e);
+            this.currentState = this.getCanvasStyle();
         });
 
         this.canvasContainer.addEventListener('mousemove', (e) => {
@@ -24,6 +26,7 @@ class Canvas {
 
         document.addEventListener('keydown', (e) => {
             this.recentreCanvas(e);
+            widgetManager.updateLocalStorage();
         });
 
         this.canvasContainer.addEventListener('wheel', (e) => {
@@ -34,9 +37,21 @@ class Canvas {
             }
             e.preventDefault();
             this.zoomCanvas(e);
+            if (Math.round(this.scale * 100) % 10 === 0) {
+                if (this.currentState.left !== this.getCanvasStyleCSS().left || this.currentState.top !== this.getCanvasStyle().top) {
+                    widgetManager.addItemActionState(this.currentState, this.getCanvasStyle(), true);
+                }
+                this.currentState = this.getCanvasStyle();
+                widgetManager.updateLocalStorage();
+            }
         });
         this.canvasContainer.addEventListener('mouseup', () => {
             this.endPan(); // Re-enable pointer events on children
+            if (this.currentState.left !== this.getCanvasStyle().left || this.currentState.top !== this.getCanvasStyle().top) {
+                widgetManager.addItemActionState(this.currentState, this.getCanvasStyle(), true);
+            }
+            this.currentState = this.getCanvasStyle();
+            widgetManager.updateLocalStorage();
         });
     }
 
@@ -67,12 +82,19 @@ class Canvas {
         }
     }
 
-    getCanvasStyle() {
-        return this.canvas.style;
+    getCanvasStyle () {
+        const left = this.canvas.style.left;
+        const top = this.canvas.style.top;
+        return {left, top};
+    }
+
+    getCanvasStyleCSS() {
+        return this.canvas.style.cssText;
     }
 
     setCanvasStyle(style) {
-        this.canvas.style = style;
+        this.canvas.style.left = style.left;
+        this.canvas.style.top = style.top;
     }
 
     endPan() {

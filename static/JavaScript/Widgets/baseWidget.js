@@ -3,6 +3,7 @@ class BaseWidget {
     constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, padding = 80, content = '', isNew = true, id = 0, isMinimized = false) {
         this.canvas = document.getElementById('canvas');
         const rect = this.canvas.getBoundingClientRect();
+        this.characterCount = 5;
 
         // Calculate the relative position of the mouse within the canvas
         const relativeX = x - rect.left;
@@ -18,6 +19,7 @@ class BaseWidget {
             content: content,
             isMinimized: isMinimized
         };
+        this.widgetState.id = widgetManager.generateRandomUniqueID();
         this.canvas = document.getElementById('canvas');
         if (isNew) {
             this.widgetContainer = this.createWidgetContainer(relativeX, relativeY, width, height);
@@ -98,6 +100,12 @@ class BaseWidget {
         this.widgetContents.addEventListener('input', () => {
             this.widgetState.content = this.widgetContents.innerHTML;
             this.updateWidgetState();
+            this.characterCount++;
+            if (this.characterCount > 5)
+            {
+                console.log('updating widget state');
+                this.characterCount = 0;
+            }
         });
     }
 
@@ -110,6 +118,7 @@ class BaseWidget {
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
+            const initialState = [{...this.getWidgetState()}];
             const startX = e.clientX;
             const startY = e.clientY;
             const startLeft = parseInt(this.widgetContainer.style.left, 10);
@@ -131,6 +140,7 @@ class BaseWidget {
                 document.removeEventListener('mousemove', onMouseMove);
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
+                widgetManager.updateWidget(this);
             }, { once: true });
         });
     }
@@ -169,7 +179,7 @@ class BaseWidget {
 
     updateIconifyStatus(height, width) {
         const blockSize = 50;
-        let minSize = widgetManager.widgetTypes[this.widgetState.widgetType].minSize;
+        let minSize = 50;
         if (height < minSize || width < minSize) {
             this.widgetContents.classList.add('hidden');
             this.optionsContainer.classList.add('hidden');

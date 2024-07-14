@@ -4,7 +4,7 @@ let widgetManager;
 document.addEventListener('DOMContentLoaded', () => {
     mainCanvas = new Canvas();
     contextMenu = new ContextMenu();
-    widgetManager = new WidgetManager();
+    widgetManager = new WidgetManager(mainCanvas);
     (async () => {
         await widgetManager.fetchWidgets();
     })();
