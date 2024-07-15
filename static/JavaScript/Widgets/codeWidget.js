@@ -11,6 +11,7 @@ class CodeWidget extends BaseWidget {
     
         // CodeMirror textarea  
         this.widgetCodeBlock = this.createCodeBlock();
+        this.defaultElement = this.widgetCodeBlock;
     
         // Save button
         const saveButton = this.createSaveButton();
@@ -46,6 +47,7 @@ class CodeWidget extends BaseWidget {
         document.getElementById('canvas-container').addEventListener('wheel', (e) => {
             this.updateEditorSize(this.widgetContents, this.editor);
         });
+        this.defaultElement = this.editor;
     }
 
     addOptionsToContainer(fileNameInput, languageSelector, saveButton) {

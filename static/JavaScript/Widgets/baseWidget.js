@@ -19,6 +19,7 @@ class BaseWidget {
             content: content,
             isMinimized: isMinimized
         };
+        this.aspectRatio = width / height;
         this.widgetState.id = widgetManager.generateRandomUniqueID();
         this.canvas = document.getElementById('canvas');
         if (isNew) {
@@ -31,12 +32,17 @@ class BaseWidget {
         this.dragHandle = this.createDragHandle();
         this.deleteButton = this.createDeleteButton();
         this.optionsContainer = this.createOptionsContainer();
+        this.defaultElement = this.widgetContents;
 
         this.appendToCanvas();
         this.appendElements();
         this.addWidgetEvents();
         this.updateWidgetState();
         this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
+    }
+
+    focusDefaultElement() {
+        this.defaultElement.focus();
     }
 
     createWidgetContainer(x, y, width, height) {
@@ -167,6 +173,7 @@ class BaseWidget {
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
                 widgetManager.updateWidgetState(this.widgetState.id);
+                this.aspectRatio = this.widgetState.width / this.widgetState.height;
             }, { once: true });
         });
     }
@@ -192,7 +199,9 @@ class BaseWidget {
         if (this.widgetState.isMinimized && height >= minSize && width >= minSize) {
             this.widgetContents.classList.remove('hidden');
             this.optionsContainer.classList.remove('hidden');
-            this.resizeWidget(minSize + 20, 0, minSize + 20, 0);
+            let newHeight = minSize + 20;
+            let newWidth = newHeight * this.aspectRatio;
+            this.resizeWidget(newHeight, 0, newWidth, 0);
             this.widgetState.isMinimized = false;
             widgetManager.updateWidgetState(this.widgetState.id);
         }
@@ -239,8 +248,14 @@ class BaseWidget {
         const newLeft = canvasX * zoomRatio + (1 - zoomRatio) * mouseX;
         const newTop = canvasY * zoomRatio + (1 - zoomRatio) * mouseY;
 
-        const newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
-        const newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
+        let newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
+        let newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
+
+        if (newHeight > newWidth) {
+            newWidth = newHeight * this.aspectRatio;
+        } else {
+            newHeight = newWidth / this.aspectRatio;
+        }
 
         this.widgetContainer.style.left = `${newLeft}px`;
         this.widgetContainer.style.top = `${newTop}px`;

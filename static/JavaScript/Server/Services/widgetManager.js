@@ -30,10 +30,11 @@ class WidgetManager {
     }
 
     addWidget(x, y, widgetType) {
-        const widget = new this.widgetTypes[widgetType](x, y, widgetType, 300, 200, 10, '', true, this.generateRandomUniqueID(), false);
+        const widget = new this.widgetTypes[widgetType](x, y, widgetType, 300, 200, 80, '', true, this.generateRandomUniqueID(), false);
         this.storedWidgets.push(widget);
         this.storedWidgetStates.push(widget.getWidgetState());
         this.addState();
+        widget.focusDefaultElement();
     }
 
     removeWidget(id) {

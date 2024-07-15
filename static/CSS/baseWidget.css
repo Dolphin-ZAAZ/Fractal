@@ -9,6 +9,7 @@
     box-sizing: border-box;
     transition: box-shadow 0.2s ease;
     cursor:default;
+    overflow: hidden;
 }
 
 .widget-container:hover {

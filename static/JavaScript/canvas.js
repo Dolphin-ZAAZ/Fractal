@@ -9,7 +9,8 @@ class Canvas {
         this.initialMouseY = null;
         this.initialRect = null;
         this.isPanning = false;
-        this.startX, this.startY;
+        this.startX, 
+        this.startY;
         this.scale = 1;
         this.addEvents();
     }
@@ -118,14 +119,9 @@ class Canvas {
         const offsetX = this.initialMouseX * (1 - zoomRatio);
         const offsetY = this.initialMouseY * (1 - zoomRatio);
 
-        this.canvas.style.width = `${newWidth}px`;
-        this.canvas.style.height = `${newHeight}px`;
-        this.canvas.style.left = `${this.canvas.offsetLeft + offsetX}px`;
-        this.canvas.style.top = `${this.canvas.offsetTop + offsetY}px`;
-
         this.scale = newScale;
         this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
-        const storedWidgets = widgetManager.getStoredWidgets();
+        let storedWidgets = widgetManager.getStoredWidgets();
         storedWidgets.forEach(widget => {
             widget.updateScale(newScale, this.initialMouseX, this.initialMouseY, zoomRatio);
         });

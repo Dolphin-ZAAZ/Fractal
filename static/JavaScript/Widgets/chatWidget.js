@@ -29,6 +29,7 @@ class ChatWidget extends BaseWidget {
         this.sendButton.className = 'send-chat-message-button';
         this.sendButton.textContent = 'Send';
         this.optionsContainer.appendChild(this.sendButton);
+        this.defaultElement = this.messageBox;
         this.sendButton.addEventListener('click', () => {
             this.sendMessage();
         });
