@@ -11,6 +11,7 @@ class CodeWidget extends BaseWidget {
     
         // CodeMirror textarea  
         this.widgetCodeBlock = this.createCodeBlock();
+        this.defaultElement = this.widgetCodeBlock;
     
         // Save button
         const saveButton = this.createSaveButton();
@@ -34,7 +35,9 @@ class CodeWidget extends BaseWidget {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
             this.updateWidgetState();
         });
-        this.editor.setOption("value", content);
+        if (content && content != '') {
+            this.editor.setOption("value", content);
+        }
         languageSelector.addEventListener('change', () => {
             this.editor.setOption("mode", languageMap[languageSelector.value.toLowerCase()]);
             this.updateWidgetState();
@@ -44,6 +47,7 @@ class CodeWidget extends BaseWidget {
         document.getElementById('canvas-container').addEventListener('wheel', (e) => {
             this.updateEditorSize(this.widgetContents, this.editor);
         });
+        this.defaultElement = this.editor;
     }
 
     addOptionsToContainer(fileNameInput, languageSelector, saveButton) {

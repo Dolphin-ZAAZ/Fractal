@@ -1,7 +1,7 @@
-let isRequestInProgress = false;
 class ChatWidget extends BaseWidget {
     constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0) {
         super(x, y, widgetType='ChatWidget', width, height, padding, content, isNew, id);
+        let isRequestInProgress = false;
         if (!this.widgetContents.querySelector('.chat-container')) {
             this.chatContainer = document.createElement('div');
         }
@@ -29,6 +29,7 @@ class ChatWidget extends BaseWidget {
         this.sendButton.className = 'send-chat-message-button';
         this.sendButton.textContent = 'Send';
         this.optionsContainer.appendChild(this.sendButton);
+        this.defaultElement = this.messageBox;
         this.sendButton.addEventListener('click', () => {
             this.sendMessage();
         });

@@ -3,6 +3,7 @@ class BaseWidget {
     constructor(x, y, widgetType="BaseWidget", width = 300, height = 200, padding = 80, content = '', isNew = true, id = 0, isMinimized = false) {
         this.canvas = document.getElementById('canvas');
         const rect = this.canvas.getBoundingClientRect();
+        this.characterCount = 5;
 
         // Calculate the relative position of the mouse within the canvas
         const relativeX = x - rect.left;
@@ -18,6 +19,8 @@ class BaseWidget {
             content: content,
             isMinimized: isMinimized
         };
+        this.aspectRatio = width / height;
+        this.widgetState.id = widgetManager.generateRandomUniqueID();
         this.canvas = document.getElementById('canvas');
         if (isNew) {
             this.widgetContainer = this.createWidgetContainer(relativeX, relativeY, width, height);
@@ -29,17 +32,17 @@ class BaseWidget {
         this.dragHandle = this.createDragHandle();
         this.deleteButton = this.createDeleteButton();
         this.optionsContainer = this.createOptionsContainer();
+        this.defaultElement = this.widgetContents;
 
         this.appendToCanvas();
         this.appendElements();
         this.addWidgetEvents();
-        
-        if (isNew) {
-            storedWidgets.push(this);
-            storedWidgetStates.push(this.widgetState);
-        }
         this.updateWidgetState();
         this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
+    }
+
+    focusDefaultElement() {
+        this.defaultElement.focus();
     }
 
     createWidgetContainer(x, y, width, height) {
@@ -103,18 +106,26 @@ class BaseWidget {
         this.widgetContents.addEventListener('input', () => {
             this.widgetState.content = this.widgetContents.innerHTML;
             this.updateWidgetState();
+            this.characterCount++;
+            if (this.characterCount > 5)
+            {
+                console.log('updating widget state');
+                this.characterCount = 0;
+                widgetManager.updateWidgetState(this.widgetState.id);
+            }
         });
     }
 
     makeDeletable() {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            deleteWidget(this);
+            widgetManager.removeWidget(this.widgetState.id);
         });
     }
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
+            const initialState = [{...this.getWidgetState()}];
             const startX = e.clientX;
             const startY = e.clientY;
             const startLeft = parseInt(this.widgetContainer.style.left, 10);
@@ -134,9 +145,9 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                addAction(actionTypes.move, this, {startX : startX, startY : startY, endX : this.widgetState.x, endY : this.widgetState.y});
                 this.x = parseInt(this.widgetContainer.style.left, 10);
                 this.y = parseInt(this.widgetContainer.style.top, 10);
+                widgetManager.updateWidgetState(this.widgetState.id);
             }, { once: true });
         });
     }
@@ -161,7 +172,8 @@ class BaseWidget {
 
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                addAction(actionTypes.resize, this, {startWidth : startWidth, startHeight : startHeight, endWidth : this.widgetState.width, endHeight : this.widgetState.height})
+                widgetManager.updateWidgetState(this.widgetState.id);
+                this.aspectRatio = this.widgetState.width / this.widgetState.height;
             }, { once: true });
         });
     }
@@ -176,18 +188,22 @@ class BaseWidget {
 
     updateIconifyStatus(height, width) {
         const blockSize = 50;
-        let minSize = widgetTypes[this.widgetState.widgetType].minSize;
+        let minSize = 50;
         if (height < minSize || width < minSize) {
             this.widgetContents.classList.add('hidden');
             this.optionsContainer.classList.add('hidden');
             this.resizeWidget(width, 0, height, 0);
             this.widgetState.isMinimized = true;
+            widgetManager.updateWidgetState(this.widgetState.id);
         }
         if (this.widgetState.isMinimized && height >= minSize && width >= minSize) {
             this.widgetContents.classList.remove('hidden');
             this.optionsContainer.classList.remove('hidden');
-            this.resizeWidget(minSize + 20, 0, minSize + 20, 0);
+            let newHeight = minSize + 20;
+            let newWidth = newHeight * this.aspectRatio;
+            this.resizeWidget(newHeight, 0, newWidth, 0);
             this.widgetState.isMinimized = false;
+            widgetManager.updateWidgetState(this.widgetState.id);
         }
         if (height <= blockSize || width <= blockSize) {
             this.resizeWidget(blockSize, 0, blockSize, 0);
@@ -216,16 +232,30 @@ class BaseWidget {
         this.widgetState.content = this.widgetContents.innerHTML;
     }
 
+    getWidgetState() {
+        return this.widgetState;
+    }
+
+    setWidgetState(widget) {
+        this.widgetState = widget.widgetState;
+    }
+
     updateScale(newScale, mouseX, mouseY, zoomRatio) {
-        const rect = canvas.getBoundingClientRect();
+        const rect = this.canvas.getBoundingClientRect();
         const canvasX = this.widgetContainer.getBoundingClientRect().left - rect.left;
         const canvasY = this.widgetContainer.getBoundingClientRect().top - rect.top;
 
         const newLeft = canvasX * zoomRatio + (1 - zoomRatio) * mouseX;
         const newTop = canvasY * zoomRatio + (1 - zoomRatio) * mouseY;
 
-        const newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
-        const newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
+        let newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
+        let newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
+
+        if (newHeight > newWidth) {
+            newWidth = newHeight * this.aspectRatio;
+        } else {
+            newHeight = newWidth / this.aspectRatio;
+        }
 
         this.widgetContainer.style.left = `${newLeft}px`;
         this.widgetContainer.style.top = `${newTop}px`;
