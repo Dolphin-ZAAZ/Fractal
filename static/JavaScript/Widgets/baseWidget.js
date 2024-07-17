@@ -27,12 +27,14 @@ class BaseWidget {
         } else {
             this.widgetContainer = this.createWidgetContainer(x, y, width, height);
         }
+        this.widgetContainer.id = this.widgetState.id;
         this.widgetContents = this.createWidgetContents(content);
         this.resizeHandle = this.createResizeHandle();
         this.dragHandle = this.createDragHandle();
         this.deleteButton = this.createDeleteButton();
         this.optionsContainer = this.createOptionsContainer();
         this.defaultElement = this.widgetContents;
+        this.widgetContainer.classList.add('selectable');
 
         this.appendToCanvas();
         this.appendElements();
@@ -85,7 +87,7 @@ class BaseWidget {
     createDeleteButton() {
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
-        deleteButton.textContent = '  X  ';
+        deleteButton.textContent = 'X';
         return deleteButton;
     }
 

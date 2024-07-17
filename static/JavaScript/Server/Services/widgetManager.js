@@ -20,6 +20,10 @@ class WidgetManager {
         });
     }
 
+    getWidgetById(id) {
+        return this.storedWidgets.find(widget => widget.widgetState.id === id);
+    }
+
     generateRandomUniqueID() {
         let id = Math.floor(Math.random() * 1000000);
         while (this.ids.includes(id)) {
@@ -54,7 +58,6 @@ class WidgetManager {
     }
 
     addState() {
-        if (this.states[0]) { if (this.canvas.getCanvasStyle().left === JSON.parse(this.states[this.stateNumber - 1].canvasState).left || this.canvas.getCanvasStyle().top === JSON.parse(this.states[this.stateNumber - 1].canvasState).top) {return;} }
         const stateNumber = JSON.stringify(this.stateNumber);
         const widgetStates = JSON.stringify(this.storedWidgetStates);
         const canvasState = JSON.stringify(this.canvas.getCanvasStyle());
@@ -64,6 +67,13 @@ class WidgetManager {
             }
         });
         this.states[stateNumber] = { widgetStates : widgetStates, canvasState : canvasState };
+        const previousState = {...this.states[this.stateNumber - 1]};
+        const newState = {...this.states[this.stateNumber]};
+        if (this.stateNumber - 1 > 0) {         
+            if (deepEqual(newState, previousState)) {
+                return;
+            } 
+        }
         localStorage.setItem('states', JSON.stringify(this.states));
         localStorage.setItem('stateNumber', JSON.stringify(this.stateNumber));
         this.stateNumber++;
@@ -72,9 +82,11 @@ class WidgetManager {
 
     loadState(stateNumber) {
         const states = JSON.parse(localStorage.getItem('states'));
+        this.states = states;
         const state = states[stateNumber];
+        this.stateNumber = stateNumber + 1;
+        console.log('Loading state:', stateNumber);
         if (!state) {
-            this.resetCanvas(); 
             return;
         }
         const widgetStates = JSON.parse(state.widgetStates);
@@ -90,10 +102,11 @@ class WidgetManager {
             this.storedWidgets.push(widget);
         });
         localStorage.setItem('stateNumber', JSON.stringify(stateNumber));
+        this.postStates();
     }
     
     undo() {
-        if (this.stateNumber > 0) {
+        if (this.stateNumber > 1) {
             this.stateNumber--;
             this.loadState(this.stateNumber - 1);
         }
@@ -104,15 +117,6 @@ class WidgetManager {
             this.stateNumber++;
             this.loadState(this.stateNumber - 1);
         }
-    }
-
-    resetCanvas() {
-        this.storedWidgets.forEach(widget => {
-            widget.widgetContainer.remove();
-        });
-        this.storedWidgets = [];
-        this.storedWidgetStates = [];
-        this.stateNumber = 0;
     }
 
     postStates() {
@@ -145,19 +149,26 @@ class WidgetManager {
         }
     }
 
-    async fetchWidgets() {
-        try {
-            const response = await fetch('/data/get-widget-storage');
-            if (!response.ok) {
-                throw new Error('Failed to get widgets');
-            }
-            const storageData = await response.json(); // Ensure this is awaited
-            localStorage.setItem('states', JSON.stringify(storageData.states));
-            localStorage.setItem('stateNumber', JSON.stringify(storageData.stateNumber));
-            this.loadState(JSON.parse(localStorage.getItem('stateNumber'))-1);
-        } catch (error) {
-            console.error(error);
-        }
+    fetchWidgets() {
+        return new Promise((resolve, reject) => {
+            fetch('/data/get-widget-storage')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to get widgets');
+                    }
+                    return response.json();
+                })
+                .then(storageData => {
+                    localStorage.setItem('states', JSON.stringify(storageData.states));
+                    localStorage.setItem('stateNumber', JSON.stringify(storageData.stateNumber));
+                    this.loadState(JSON.parse(localStorage.getItem('stateNumber')) - 1);
+                    resolve();
+                })
+                .catch(error => {
+                    console.error(error);
+                    reject(error);
+                });
+        });
     }
     
     clearCanvas () {
@@ -166,9 +177,10 @@ class WidgetManager {
         });
         this.storedWidgets = [];
         this.storedWidgetStates = [];
-        this.actionStack = [];
-        this.currentState = [];
+        this.states = {};
+        this.stateNumber = 0;
         localStorage.clear();
+        this.postStates();
     }
 
     getStoredWidgets() {

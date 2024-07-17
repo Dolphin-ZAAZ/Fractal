@@ -9,8 +9,8 @@ class Canvas {
         this.initialMouseY = null;
         this.initialRect = null;
         this.isPanning = false;
-        this.startX, 
-        this.startY;
+        this.startX = 0;
+        this.startY = 0;
         this.scale = 1;
         this.addEvents();
     }
@@ -43,6 +43,9 @@ class Canvas {
     }
 
     startPan(e) {
+        if (e.ctrlKey == true) {
+            return; // Exit the function if the chat message box is the target
+        }
         if (isClickInsideElementWithClass(e, 'widget-container')) {
             if (e.altKey == false) {
                 return; // Exit the function if the chat message box is the target
@@ -58,10 +61,9 @@ class Canvas {
     }
 
     recentreCanvas(e) {
-        if (isClickInsideElementWithClass(e, 'widget-container')) {
-            if (e.altKey == false) {
-                return; // Exit the function if the chat message box is the target
-            }
+        e.preventDefault();
+        if (e.altKey == false) {
+            return; // Exit the function if the chat message box is the target
         }
         if (e.key === 'f') {
             this.canvas.style.left = '0';

@@ -2,10 +2,10 @@
     position: absolute;
     background-color: var(--widget-background-color);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 2px;
     user-select: none;
     will-change: transform;
-    padding: 15px;
+    padding: 20px;
     box-sizing: border-box;
     transition: box-shadow 0.2s ease;
     cursor:default;
@@ -78,17 +78,25 @@
 
 .delete-button {
     position: absolute;
-    top: -15px;
-    right: -13px;
+    width: 16px;
+    height: 16px;
+    top: 0px;
+    text-align: center;
+    right: 0px;
     background-color: red;
     color: white;
     border: none;
-    border-radius: 30%;
-    padding: 5px;
+    border-radius: 0%;
+    padding: 0px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 .hidden {
     display: none !important;
+}
+
+.selected {
+    border-color: aqua;
+    
 }
