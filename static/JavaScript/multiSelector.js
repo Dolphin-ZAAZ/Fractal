@@ -86,4 +86,11 @@ class MultiSelector {
                  rect2.top > rect1.bottom ||
                  rect2.bottom < rect1.top);
     }
+
+    startMoveAllWidgets(e) {
+        for (let i = 0; i < this.selectedWidgets.length; i++) {
+            const widget = this.selectedWidgets[i];
+            widget.handleDrag(e);
+        }
+    }
 }

@@ -21,7 +21,11 @@ class WidgetManager {
     }
 
     getWidgetById(id) {
-        return this.storedWidgets.find(widget => widget.widgetState.id === id);
+        for (let widget of this.storedWidgets) {
+            if (parseInt(widget.widgetState.id) === parseInt(id)) {
+                return widget;
+            }
+        }
     }
 
     generateRandomUniqueID() {

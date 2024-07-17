@@ -20,7 +20,7 @@ class BaseWidget {
             isMinimized: isMinimized
         };
         this.aspectRatio = width / height;
-        this.widgetState.id = widgetManager.generateRandomUniqueID();
+        this.widgetState.id = id;
         this.canvas = document.getElementById('canvas');
         if (isNew) {
             this.widgetContainer = this.createWidgetContainer(relativeX, relativeY, width, height);
@@ -127,31 +127,48 @@ class BaseWidget {
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
-            const initialState = [{...this.getWidgetState()}];
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startLeft = parseInt(this.widgetContainer.style.left, 10);
-            const startTop = parseInt(this.widgetContainer.style.top, 10);
-
-            const onMouseMove = (e) => {
-                const dx = (e.clientX - startX) / scaleRatio;
-                const dy = (e.clientY - startY) / scaleRatio;
-                this.widgetContainer.style.left = `${startLeft + dx}px`;
-                this.widgetContainer.style.top = `${startTop + dy}px`;
-                this.widgetState.x = parseInt(this.widgetContainer.style.left, 10);
-                this.widgetState.y = parseInt(this.widgetContainer.style.top, 10);
-                this.updateWidgetState();
-            };
-
-            document.addEventListener('mousemove', onMouseMove);
-
-            document.addEventListener('mouseup', () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                this.x = parseInt(this.widgetContainer.style.left, 10);
-                this.y = parseInt(this.widgetContainer.style.top, 10);
-                widgetManager.updateWidgetState(this.widgetState.id);
-            }, { once: true });
+            multiSelector.startMoveAllWidgets(e);
         });
+    }
+
+    handleDrag(e) {
+        const { startX, startY, startLeft, startTop } = this.getWidgetStartPosition(e);
+
+        const onMouseMove = (e) => {
+            this.moveWidget(e, startX, startY, startLeft, startTop);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+
+        document.addEventListener('mouseup', () => {
+            this.removeMouseMoveListener(onMouseMove);
+        }, { once: true });
+    }
+
+    removeMouseMoveListener(onMouseMove) {
+        document.removeEventListener('mousemove', onMouseMove);
+        this.x = parseInt(this.widgetContainer.style.left, 10);
+        this.y = parseInt(this.widgetContainer.style.top, 10);
+        widgetManager.updateWidgetState(this.widgetState.id);
+    }
+
+    moveWidget(e, startX, startY, startLeft, startTop) {
+        const dx = (e.clientX - startX) / scaleRatio;
+        const dy = (e.clientY - startY) / scaleRatio;
+        this.widgetContainer.style.left = `${startLeft + dx}px`;
+        this.widgetContainer.style.top = `${startTop + dy}px`;
+        this.widgetState.x = parseInt(this.widgetContainer.style.left, 10);
+        this.widgetState.y = parseInt(this.widgetContainer.style.top, 10);
+        this.updateWidgetState();
+    }
+
+    getWidgetStartPosition(e) {
+        const initialState = [{ ...this.getWidgetState() }];
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startLeft = parseInt(this.widgetContainer.style.left, 10);
+        const startTop = parseInt(this.widgetContainer.style.top, 10);
+        return { startX, startY, startLeft, startTop };
     }
 
     makeResizable() {
