@@ -127,7 +127,17 @@ class BaseWidget {
 
     makeDraggable() {
         this.dragHandle.addEventListener('mousedown', (e) => {
-            multiSelector.startMoveAllWidgets(e);
+            if (multiSelector.hasSelections) {
+                if (multiSelector.selectedWidgets.includes(this)) {
+                    multiSelector.startMoveAllWidgets(e);
+                }
+                else {
+                    this.handleDrag(e);
+                }
+            }
+            else {
+                this.handleDrag(e);
+            }
         });
     }
 
@@ -173,28 +183,36 @@ class BaseWidget {
 
     makeResizable() {
         this.resizeHandle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startWidth = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
-            const startHeight = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
-
-            const onMouseMove = (e) => {
-                const dx = (e.clientX - startX) / scaleRatio;
-                const dy = (e.clientY - startY) / scaleRatio;
-                this.resizeWidget(startWidth, dx, startHeight, dy);
-                this.updateWidgetState();
-                this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
-            };
-
-            document.addEventListener('mousemove', onMouseMove);
-
-            document.addEventListener('mouseup', () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                widgetManager.updateWidgetState(this.widgetState.id);
-                this.aspectRatio = this.widgetState.width / this.widgetState.height;
-            }, { once: true });
+            if (multiSelector.hasSelections) {
+                multiSelector.startResizeAllWidgets(e);
+            } else {
+                this.handleResize(e);
+            }
         });
+    }
+
+    handleResize(e) {
+        e.stopPropagation();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).width, 10);
+        const startHeight = parseInt(document.defaultView.getComputedStyle(this.widgetContainer).height, 10);
+
+        const onMouseMove = (e) => {
+            const dx = (e.clientX - startX) / scaleRatio;
+            const dy = (e.clientY - startY) / scaleRatio;
+            this.resizeWidget(startWidth, dx, startHeight, dy);
+            this.updateWidgetState();
+            this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+
+        document.addEventListener('mouseup', () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            widgetManager.updateWidgetState(this.widgetState.id);
+            this.aspectRatio = this.widgetState.width / this.widgetState.height;
+        }, { once: true });
     }
 
     resizeWidget(startWidth, dx, startHeight, dy) {

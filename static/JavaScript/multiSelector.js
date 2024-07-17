@@ -7,6 +7,7 @@ class MultiSelector {
         this.selectionBox = null;
         this.selectedElements = [];
         this.selectedWidgets = [];
+        this.hasSelections = false;
         this.init();
     }
 
@@ -16,7 +17,12 @@ class MultiSelector {
         this.container.addEventListener('mouseup', (e) => this.onMouseUp(e));
     }
 
-    onMouseDown(e) {
+    onMouseDown(e) { 
+        if (isClickInsideElementWithClass(e, 'widget-container')) {
+            if (e.altKey == false) {
+                return;
+            }
+        }
         if (e.ctrlKey) {
             e.preventDefault();
             this.startX = e.clientX;
@@ -60,24 +66,38 @@ class MultiSelector {
         const selectionRect = this.selectionBox.getBoundingClientRect();
         this.selectedElements = [];
         this.selectedWidgets = [];
+        let hasAnySelections = false;
 
         const elementsToSelect = this.container.querySelectorAll('.selectable');
-        elementsToSelect.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            if (this.isOverlapping(selectionRect, rect)) {
-                this.selectedElements.push(el);
-                el.classList.add('selected');
-                widgetManager.addState();
-            } else {
-                el.classList.remove('selected');
-                widgetManager.addState();
+        elementsToSelect.forEach(element => {
+            const rect = element.getBoundingClientRect();
+            if (element.classList.contains('selected')) {
+                this.selectedElements.push(element);
             }
+            if (this.isOverlapping(selectionRect, rect)) {
+                hasAnySelections = true;
+                if (!this.selectedElements.includes(element)) {
+                    this.selectedElements.push(element);
+                    element.classList.add('selected');
+                    widgetManager.addState();
+                }
+                else {
+                    element.classList.remove('selected');
+                    this.selectedElements = this.selectedElements.filter(selectedElement => selectedElement !== element);
+                    widgetManager.addState();
+                }
+            } 
         });
+        if (!hasAnySelections) {
+            elementsToSelect.forEach(element => {
+                element.classList.remove('selected');
+                widgetManager.addState();
+            });
+        }
         for (let i = 0; i < this.selectedElements.length; i++) {
             this.selectedWidgets.push(widgetManager.getWidgetById(this.selectedElements[i].id));
         }
-        console.log('Selected Elements:', this.selectedElements);
-        console.log('Selected Widgets:', this.selectedWidgets);
+        this.hasSelections = this.selectedElements.length > 0;
     }
 
     isOverlapping(rect1, rect2) {
@@ -91,6 +111,13 @@ class MultiSelector {
         for (let i = 0; i < this.selectedWidgets.length; i++) {
             const widget = this.selectedWidgets[i];
             widget.handleDrag(e);
+        }
+    }
+
+    startResizeAllWidgets(e) {
+        for (let i = 0; i < this.selectedWidgets.length; i++) {
+            const widget = this.selectedWidgets[i];
+            widget.handleResize(e);
         }
     }
 }
