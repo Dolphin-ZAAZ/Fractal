@@ -15,6 +15,10 @@ class Canvas {
         this.addEvents();
     }
 
+    getScale() {
+        return this.scale;
+    }
+
     addEvents() {
         this.canvasContainer.addEventListener('mousedown', (e) => {
             this.startPan(e);
@@ -113,19 +117,11 @@ class Canvas {
 
         const zoomRatio = newScale / this.scale;
 
-        // Adjust the canvas dimensions
-        const newWidth = this.initialRect.width * zoomRatio;
-        const newHeight = this.initialRect.height * zoomRatio;
-
-        // Calculate the new position to keep the zoom centered on the initial mouse position
-        const offsetX = this.initialMouseX * (1 - zoomRatio);
-        const offsetY = this.initialMouseY * (1 - zoomRatio);
-
         this.scale = newScale;
         this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
         let storedWidgets = widgetManager.getStoredWidgets();
         storedWidgets.forEach(widget => {
-            widget.updateScale(newScale, this.initialMouseX, this.initialMouseY, zoomRatio);
+            widget.updateScale(this.initialMouseX, this.initialMouseY, zoomRatio);
         });
 
         // Reset initial mouse positions after zooming

@@ -4,6 +4,11 @@ class BaseWidget {
         this.canvas = document.getElementById('canvas');
         const rect = this.canvas.getBoundingClientRect();
         this.characterCount = 5;
+        this.initialWidth = width;
+        this.initialHeight = height;
+        this.theoreticalWidth = width;
+        this.theoreticalHeight = height;
+        this.initialScale = mainCanvas.getScale();
 
         // Calculate the relative position of the mouse within the canvas
         const relativeX = x - rect.left;
@@ -222,6 +227,11 @@ class BaseWidget {
             document.removeEventListener('mousemove', onMouseMove);
             widgetManager.updateWidgetState(this.widgetState.id);
             this.aspectRatio = this.widgetState.width / this.widgetState.height;
+            this.initialHeight = this.widgetState.height;
+            this.initialWidth = this.widgetState.width;
+            this.theoreticalHeight = this.initialHeight;
+            this.theoreticalWidth = this.initialWidth;
+            this.initialScale = mainCanvas.getScale();
         }, { once: true });
     }
 
@@ -234,9 +244,9 @@ class BaseWidget {
     }
 
     updateIconifyStatus(height, width) {
-        const blockSize = 50;
-        let minSize = 50;
-        if (height < minSize || width < minSize) {
+        const blockSize = 70;
+        let minSize = 70;
+        if (height <= minSize || width <= minSize) {
             this.widgetContents.classList.add('hidden');
             this.optionsContainer.classList.add('hidden');
             this.resizeWidget(width, 0, height, 0);
@@ -288,7 +298,7 @@ class BaseWidget {
         this.widgetState = widget.widgetState;
     }
 
-    updateScale(newScale, mouseX, mouseY, zoomRatio) {
+    updateScale(mouseX, mouseY, zoomRatio) {
         const rect = this.canvas.getBoundingClientRect();
         const canvasX = this.widgetContainer.getBoundingClientRect().left - rect.left;
         const canvasY = this.widgetContainer.getBoundingClientRect().top - rect.top;
@@ -296,14 +306,12 @@ class BaseWidget {
         const newLeft = canvasX * zoomRatio + (1 - zoomRatio) * mouseX;
         const newTop = canvasY * zoomRatio + (1 - zoomRatio) * mouseY;
 
-        let newHeight = parseInt(this.widgetContainer.style.height) * zoomRatio;
-        let newWidth = parseInt(this.widgetContainer.style.width) * zoomRatio;
-
-        if (newHeight > newWidth) {
-            newWidth = newHeight * this.aspectRatio;
-        } else {
-            newHeight = newWidth / this.aspectRatio;
-        }
+        
+        this.theoreticalHeight = this.initialHeight * mainCanvas.getScale() / this.initialScale;
+        this.theoreticalWidth = this.initialWidth * mainCanvas.getScale() / this.initialScale;
+        
+        let newHeight = parseInt(this.theoreticalHeight);
+        let newWidth = parseInt(this.theoreticalWidth);
 
         this.widgetContainer.style.left = `${newLeft}px`;
         this.widgetContainer.style.top = `${newTop}px`;
@@ -312,6 +320,6 @@ class BaseWidget {
 
         this.resizeContents(this.widgetState.padding);
         this.updateWidgetState();
-        this.updateIconifyStatus(this.widgetState.height, this.widgetState.width);
+        this.updateIconifyStatus(this.theoreticalHeight, this.theoreticalWidth);
     }
 }
