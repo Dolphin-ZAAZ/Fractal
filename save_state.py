@@ -6,21 +6,30 @@ data_path = os.getcwd() + '/data'
 saved_messages_path = data_path + '/saved_messages.json'
 local_storage_path = data_path + '/local_storage.json'
 
-if not os.path.exists(local_storage_path):
-    with open(local_storage_path, 'w') as f:
-        json.dump([], f)
+def checkIfStorageExists(local_storage_path):
+    if not os.path.exists(local_storage_path):
+        with open(local_storage_path, 'w') as f:
+            json.dump([], f)
+    if not os.path.exists(saved_messages_path):
+        with open(saved_messages_path, 'w') as f:
+            json.dump([], f)
+
+checkIfStorageExists(local_storage_path)
         
 def get_local_storage():
+    checkIfStorageExists(local_storage_path)
     with open(local_storage_path, 'r') as f:
         return json.load(f)
     
 def set_local_storage(value):
+    checkIfStorageExists(local_storage_path)
     with open(local_storage_path, 'w') as f:
         json.dump(value, f)
     
 
 def get_past_messages(num_messages, id):
     past_messages = []
+    checkIfStorageExists(local_storage_path)
     with open(saved_messages_path, 'r') as f:  # Open the file in read mode
         messages = json.load(f)
     for message in messages:
@@ -30,6 +39,7 @@ def get_past_messages(num_messages, id):
     return past_messages[-num_messages:]
 
 def add_to_memory(message, formatted_response, chat_widget_id):
+    checkIfStorageExists(local_storage_path)
     added_message = {
         'message': message,
         'response': formatted_response,
@@ -43,6 +53,7 @@ def add_to_memory(message, formatted_response, chat_widget_id):
         json.dump(existing_messages, f)
     
 def get_memory_history():
+    checkIfStorageExists(local_storage_path)
     past_messages = get_past_messages(5)
     user_messages = []
     ai_responses = []
@@ -52,6 +63,7 @@ def get_memory_history():
     return user_messages, ai_responses
 
 def delete_memory(id, saved_messages_path):
+    checkIfStorageExists(local_storage_path)
     # Read the existing data
     with open(saved_messages_path, 'r') as f:
         memories = json.load(f)

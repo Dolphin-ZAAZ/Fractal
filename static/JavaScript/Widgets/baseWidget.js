@@ -121,8 +121,18 @@ class BaseWidget {
     makeDeletable() {
         this.deleteButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            widgetManager.removeWidget(this.widgetState.id);
+            if (multiSelector.hasSelections) {
+                if (multiSelector.selectedWidgets.includes(this)) {
+                    multiSelector.removeSelectedWidgets();
+                }
+            } else {
+                this.deleteWidget();
+            }
         });
+    }
+
+    deleteWidget() {
+        widgetManager.removeWidget(this.widgetState.id);
     }
 
     makeDraggable() {
@@ -238,6 +248,7 @@ class BaseWidget {
             this.optionsContainer.classList.remove('hidden');
             let newHeight = minSize + 20;
             let newWidth = newHeight * this.aspectRatio;
+            console.log(newHeight, newWidth);
             this.resizeWidget(newHeight, 0, newWidth, 0);
             this.widgetState.isMinimized = false;
             widgetManager.updateWidgetState(this.widgetState.id);

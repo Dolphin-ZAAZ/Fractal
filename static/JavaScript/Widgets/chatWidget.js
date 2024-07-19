@@ -1,7 +1,6 @@
 class ChatWidget extends BaseWidget {
-    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0) {
-        super(x, y, widgetType='ChatWidget', width, height, padding, content, isNew, id);
-        let isRequestInProgress = false;
+    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0, isMinimized = false) {
+        super(x, y, widgetType='ChatWidget', width, height, padding, content, isNew, id, isMinimized);
         if (!this.widgetContents.querySelector('.chat-container')) {
             this.chatContainer = document.createElement('div');
         }
@@ -46,10 +45,6 @@ class ChatWidget extends BaseWidget {
         this.resizeContents(80, this.widgetContainer);
     }
     sendMessage() {
-        if (isRequestInProgress) {
-            return;
-        }
-        isRequestInProgress = true;
         const message = this.messageBox.value.trim();
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
@@ -143,7 +138,6 @@ class ChatWidget extends BaseWidget {
                 this.chatLog.removeChild(thinkingElement);
             })
             .finally(() => {
-                isRequestInProgress = false;
                 this.updateWidgetState();
             });
             this.chatLog.scrollTop = this.chatLog.scrollHeight;

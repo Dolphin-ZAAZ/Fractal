@@ -11,6 +11,7 @@ model_base_prompt = "You are a kind, enthusiastic and helpful robot and your nam
 model_endpoints = {
     "GPT 3.5": "gpt-3.5-turbo-0125",
     "GPT 4": "gpt-4o",
+    "GPT 4 Mini" : "gpt-4o-mini",
     "Mistral 7B": "open-mistral-7b",
     "Mixtral 8x7B": "open-mixtral-8x7b",
     "Mixtral 8x22B": "open-mixtral-8x22b",
@@ -20,13 +21,13 @@ model_endpoints = {
     "Claude 3 Opus": "claude-3-opus-20240229"
 }
 
-main_model = "gpt-4o"
-functional_model = "gpt-4o"
-tools_model = "gpt-4o"
+main_model = "gpt-4o-mini"
+functional_model = "gpt-4o-mini"
+tools_model = "gpt-4o-mini"
 
 def set_client(model):
     global client
-    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o":
+    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o" or model == "gpt-4o-mini":
         openai.api_key = os.getenv('OPENAI_API_KEY')
         client = openai.OpenAI()
     elif model == "open-mistral-7b" or model == "open-mixtral-8x7b" or model == "open-mixtral-8x22b" or model == "mistral-small-latest" or model == "mistral-large-latest":
@@ -35,7 +36,7 @@ def set_client(model):
         client = anthropic.Anthropic()
         
 def get_functional_inference(model, system_message, user_message, length=500):
-    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o":
+    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o" or model == "gpt-4o-mini":
         api_type = "openai"
     if model == "open-mistral-7b" or model == "open-mixtral-8x7b" or model == "open-mixtral-8x22b" or model == "mistral-small-latest" or model == "mistral-large-latest":
         api_type = "mistral"
@@ -71,7 +72,7 @@ def get_functional_inference(model, system_message, user_message, length=500):
 
 def get_ai_response(message, model, preprompt):
     set_client(model)
-    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o":
+    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o" or model == "gpt-4o-mini":
         api_type = "openai"
     if model == "open-mistral-7b" or model == "open-mixtral-8x7b" or model == "open-mixtral-8x22b" or model == "mistral-small-latest" or model == "mistral-large-latest":
         api_type = "mistral"
@@ -107,7 +108,7 @@ def get_ai_response(message, model, preprompt):
 
 def get_full_ai_response(messages, prompt, model, preprompt):
     set_client(model)
-    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o":
+    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o" or model == "gpt-4o-mini":
         api_type = "openai"
     if model == "open-mistral-7b" or model == "open-mixtral-8x7b" or model == "open-mixtral-8x22b" or model == "mistral-small-latest" or model == "mistral-large-latest":
         api_type = "mistral"
@@ -150,7 +151,7 @@ def make_tool(function_name, description, parameters = {'summary' : {'name': 'su
 
 def get_tool_inference(model, messages, tools, tool_choice):
     set_client(model)
-    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o":
+    if model == "gpt-3.5-turbo-0125" or model == "gpt-4o" or model == "gpt-4o-mini":
         api_type = "openai"
     if model == "open-mistral-7b" or model == "open-mixtral-8x7b" or model == "open-mixtral-8x22b" or model == "mistral-small-latest" or model == "mistral-large-latest":
         api_type = "mistral"

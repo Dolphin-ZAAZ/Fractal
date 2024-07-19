@@ -83,7 +83,7 @@ class WidgetManager {
         this.stateNumber++;
         this.postStates();
     }
-
+    
     loadState(stateNumber) {
         const states = JSON.parse(localStorage.getItem('states'));
         this.states = states;
@@ -140,7 +140,7 @@ class WidgetManager {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Failed to save widgets');
+                    throw new Error('Failed to save widgets');  
                 }
                 return response.json();
             })
@@ -163,6 +163,9 @@ class WidgetManager {
                     return response.json();
                 })
                 .then(storageData => {
+                    if (!storageData.states) {
+                        return;
+                    }
                     localStorage.setItem('states', JSON.stringify(storageData.states));
                     localStorage.setItem('stateNumber', JSON.stringify(storageData.stateNumber));
                     this.loadState(JSON.parse(localStorage.getItem('stateNumber')) - 1);

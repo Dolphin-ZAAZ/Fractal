@@ -61,11 +61,11 @@ class Canvas {
     }
 
     recentreCanvas(e) {
-        e.preventDefault();
         if (e.altKey == false) {
             return; // Exit the function if the chat message box is the target
         }
         if (e.key === 'f') {
+            e.preventDefault();
             this.canvas.style.left = '0';
             this.canvas.style.top = '0';
         }

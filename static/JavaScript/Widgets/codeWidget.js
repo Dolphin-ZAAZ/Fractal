@@ -1,7 +1,7 @@
 class CodeWidget extends BaseWidget {
     // Add widget functionality
-    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0) {
-        super(x, y, widgetType='CodeWidget', width, height, padding, '', isNew, id);
+    constructor(x, y, widgetType, width, height, padding, content, isNew = true, id = 0, isMinimized = false) {
+        super(x, y, widgetType='CodeWidget', width, height, padding, '', isNew, id, isMinimized);
 
         // File name input
         const fileNameInput = this.createFileNameInput();

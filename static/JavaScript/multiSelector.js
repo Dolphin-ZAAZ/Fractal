@@ -18,11 +18,6 @@ class MultiSelector {
     }
 
     onMouseDown(e) { 
-        if (isClickInsideElementWithClass(e, 'widget-container')) {
-            if (e.altKey == false) {
-                return;
-            }
-        }
         if (e.ctrlKey) {
             e.preventDefault();
             this.startX = e.clientX;
@@ -53,6 +48,12 @@ class MultiSelector {
     onMouseUp(e) {
         if (this.isSelecting) {
             this.isSelecting = false;
+            if (e.clientX === this.startX && e.clientY === this.startY) {
+                this.selectionBox.style.left = `${Math.min(this.startX, this.startX + 2)}px`;
+                this.selectionBox.style.top = `${Math.min(this.startY, this.startY + 2)}px`;
+                this.selectionBox.style.width = `${Math.abs(this.startX - this.startX + 2)}px`;
+                this.selectionBox.style.height = `${Math.abs(this.startY - this.startY + 2)}px`;
+            }
             this.selectElements();
 
             if (this.selectionBox) {
@@ -67,7 +68,6 @@ class MultiSelector {
         this.selectedElements = [];
         this.selectedWidgets = [];
         let hasAnySelections = false;
-
         const elementsToSelect = this.container.querySelectorAll('.selectable');
         elementsToSelect.forEach(element => {
             const rect = element.getBoundingClientRect();
@@ -79,19 +79,19 @@ class MultiSelector {
                 if (!this.selectedElements.includes(element)) {
                     this.selectedElements.push(element);
                     element.classList.add('selected');
-                    widgetManager.addState();
+                    widgetManager.addState(true);
                 }
                 else {
                     element.classList.remove('selected');
                     this.selectedElements = this.selectedElements.filter(selectedElement => selectedElement !== element);
-                    widgetManager.addState();
+                    widgetManager.addState(true);
                 }
             } 
         });
         if (!hasAnySelections) {
             elementsToSelect.forEach(element => {
                 element.classList.remove('selected');
-                widgetManager.addState();
+                widgetManager.addState(true);
             });
         }
         for (let i = 0; i < this.selectedElements.length; i++) {
@@ -119,5 +119,15 @@ class MultiSelector {
             const widget = this.selectedWidgets[i];
             widget.handleResize(e);
         }
+    }
+
+    removeSelectedWidgets() {
+        for (let i = 0; i < this.selectedWidgets.length; i++) {
+            const widget = this.selectedWidgets[i];
+            widgetManager.removeWidget(widget.widgetState.id, true);
+        }
+        this.selectedWidgets = [];
+        this.selectedElements = [];
+        this.hasSelections = false;
     }
 }
