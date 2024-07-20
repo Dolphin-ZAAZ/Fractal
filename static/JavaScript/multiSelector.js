@@ -92,6 +92,8 @@ class MultiSelector {
             elementsToSelect.forEach(element => {
                 element.classList.remove('selected');
                 widgetManager.addState(true);
+                this.selectedWidgets = [];
+                this.selectedElements = [];
             });
         }
         for (let i = 0; i < this.selectedElements.length; i++) {

@@ -247,11 +247,13 @@ class BaseWidget {
         const blockSize = 70;
         let minSize = 70;
         if (height <= minSize || width <= minSize) {
-            this.widgetContents.classList.add('hidden');
-            this.optionsContainer.classList.add('hidden');
-            this.resizeWidget(width, 0, height, 0);
-            this.widgetState.isMinimized = true;
-            widgetManager.updateWidgetState(this.widgetState.id);
+            if (this.widgetState.isMinimized === false) {
+                this.widgetContents.classList.add('hidden');
+                this.optionsContainer.classList.add('hidden');
+                this.resizeWidget(width, 0, height, 0);
+                this.widgetState.isMinimized = true;
+                widgetManager.updateWidgetState(this.widgetState.id);
+            }
         }
         if (this.widgetState.isMinimized && height >= minSize && width >= minSize) {
             this.widgetContents.classList.remove('hidden');
