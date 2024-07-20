@@ -61,6 +61,13 @@ class WidgetManager {
         this.addState();
     }
 
+    updateAllWidgetStates() {
+        this.storedWidgets.forEach(widget => {
+            const index = this.storedWidgets.indexOf(widget);
+            this.storedWidgetStates[index] = widget.getWidgetState();
+        });
+    }
+
     addState() {
         const stateNumber = JSON.stringify(this.stateNumber);
         const widgetStates = JSON.stringify(this.storedWidgetStates);

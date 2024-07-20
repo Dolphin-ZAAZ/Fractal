@@ -13,3 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     widgetManager.fetchWidgets();
 });
+window.addEventListener('beforeunload', (event) => {
+    if (true) {
+        widgetManager.updateAllWidgetStates();
+        widgetManager.addState();
+    }
+});

@@ -121,6 +121,9 @@ class BaseWidget {
                 widgetManager.updateWidgetState(this.widgetState.id);
             }
         });
+        this.widgetContents.addEventListener('blur', (e) => {
+            widgetManager.updateWidgetState(this.widgetState.id);
+        });
     }
 
     makeDeletable() {

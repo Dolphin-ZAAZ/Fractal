@@ -20,6 +20,7 @@ class ChatWidget extends BaseWidget {
         this.widgetContents.appendChild(this.chatContainer);
         this.messageBox = document.createElement('textarea');
         this.messageBox.className = 'chat-message-box';
+        this.messageBox.id = 'chat-message-box-' + this.widgetState.id;
         this.messageBox.placeholder = 'Type your message...';
         this.optionsContainer.appendChild(this.messageBox);
         this.optionsContainer.classList.remove('options-container');

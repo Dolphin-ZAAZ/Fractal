@@ -78,7 +78,8 @@ class Canvas {
     getCanvasStyle () {
         const left = this.canvas.style.left;
         const top = this.canvas.style.top;
-        return {left, top};
+        const scale = this.scale;
+        return {left, top, scale};
     }
 
     getCanvasStyleCSS() {
@@ -88,6 +89,8 @@ class Canvas {
     setCanvasStyle(style) {
         this.canvas.style.left = style.left;
         this.canvas.style.top = style.top;
+        this.scale = style.scale;
+        this.UpdateInfoPanel();
     }
 
     endPan() {
@@ -118,14 +121,23 @@ class Canvas {
         const zoomRatio = newScale / this.scale;
 
         this.scale = newScale;
-        this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
+        this.UpdateInfoPanel();
         let storedWidgets = widgetManager.getStoredWidgets();
         storedWidgets.forEach(widget => {
             widget.updateScale(this.initialMouseX, this.initialMouseY, zoomRatio);
         });
 
+        if (parseInt(this.scale * 100) % 10 === 0) {
+            widgetManager.updateAllWidgetStates();
+            widgetManager.addState();
+        }
+
         // Reset initial mouse positions after zooming
         this.initialMouseX = null;
         this.initialMouseY = null;
+    }
+
+    UpdateInfoPanel() {
+        this.infoPanel.innerHTML = `Scale: ${Math.round(this.scale * 100)}%`;
     }
 }
